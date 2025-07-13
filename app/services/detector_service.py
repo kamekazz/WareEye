@@ -8,7 +8,13 @@ load_dotenv()
 
 CAMERA_IP = os.getenv("CAMERA_IP", "192.168.1.163")
 CAMERA_PASS = os.getenv("CAMERA_PASS", "")
+# Additional options passed to OpenCV when opening the RTSP stream. By default
+# TCP is used to reduce packet loss.
+RTSP_OPTIONS = os.getenv("RTSP_OPTIONS", "rtsp_transport=tcp")
+
 STREAM_URL = f"rtsp://admin:{CAMERA_PASS}@{CAMERA_IP}:554/h264Preview_01_main"
+if RTSP_OPTIONS:
+    STREAM_URL += f"?{RTSP_OPTIONS}"
 
 # Shared detector instance used by the Flask routes
 

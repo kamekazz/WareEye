@@ -16,6 +16,8 @@ Create a `.env` file with your camera credentials:
 ```ini
 CAMERA_IP=192.168.1.163
 CAMERA_PASS=your_password
+# Optional: tweak RTSP parameters passed to OpenCV
+RTSP_OPTIONS=rtsp_transport=tcp
 ```
 
 ## Running the App
