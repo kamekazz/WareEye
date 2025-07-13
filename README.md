@@ -29,6 +29,9 @@ Then open your browser and navigate to `http://localhost:5000/` to view the live
 Frame acquisition now runs in a dedicated thread to minimize latency. The camera
 attempts to lock exposure, white balance and focus where supported. Adjust these
 parameters in `webcam_service.py` if your hardware requires different values.
+Frames are converted to grayscale and passed through CLAHE (adaptive histogram
+equalization) before barcode decoding to improve contrast and reliability under
+varying lighting conditions.
 
 ## Project Structure
 
