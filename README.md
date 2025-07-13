@@ -24,6 +24,12 @@ Start the services using the provided script:
 
 Then open your browser and navigate to `http://localhost:5000/` to view the live stream.
 
+## Capture Pipeline
+
+Frame acquisition now runs in a dedicated thread to minimize latency. The camera
+attempts to lock exposure, white balance and focus where supported. Adjust these
+parameters in `webcam_service.py` if your hardware requires different values.
+
 ## Project Structure
 
 - `app/routes/` – Flask blueprints with HTTP endpoints

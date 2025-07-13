@@ -1,19 +1,50 @@
 import cv2
 import threading
+import queue
 from pyzbar import pyzbar
 
 from . import barcode_service
 
 _cap = cv2.VideoCapture(0)
+
+# Attempt to lock camera settings for consistent exposure/white balance/focus.
+try:
+    _cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
+    _cap.set(cv2.CAP_PROP_AUTO_WB, 0)
+    _cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)
+except Exception:
+    pass
+
 _lock = threading.Lock()
+_frame_queue: "queue.Queue[cv2.Mat]" = queue.Queue(maxsize=1)
+_stop_event = threading.Event()
+
+
+def _capture_loop() -> None:
+    """Continuously capture frames in a separate thread."""
+    while not _stop_event.is_set():
+        with _lock:
+            ret, frame = _cap.read()
+        if not ret:
+            continue
+        # Keep only the most recent frame to avoid lag.
+        if _frame_queue.full():
+            try:
+                _frame_queue.get_nowait()
+            except queue.Empty:
+                pass
+        _frame_queue.put(frame)
+
+
+_thread = threading.Thread(target=_capture_loop, daemon=True)
+_thread.start()
 
 
 def get_frame():
-    with _lock:
-        if not _cap.isOpened():
-            return None, None
-        ret, frame = _cap.read()
-    if not ret:
+    """Retrieve the latest frame from the capture thread."""
+    try:
+        frame = _frame_queue.get(timeout=0.1)
+    except queue.Empty:
         return None, None
     ret, buf = cv2.imencode('.jpg', frame)
     jpg = buf.tobytes() if ret else None
@@ -21,6 +52,7 @@ def get_frame():
 
 
 def frames():
+    """Generator yielding JPEG-encoded frames with barcode decoding."""
     while True:
         frame, jpg = get_frame()
         if jpg is None:
