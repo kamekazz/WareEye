@@ -20,7 +20,6 @@ def create_camera():
         request.form.get('name', ''),
         request.form.get('zone', ''),
         request.form.get('ip_address', ''),
-        request.form.get('url', ''),
         request.form.get('password', ''),
         scanning,
     )
@@ -42,7 +41,6 @@ def update_camera(camera_id: int):
         request.form.get('name', ''),
         request.form.get('zone', ''),
         request.form.get('ip_address', ''),
-        request.form.get('url', ''),
         request.form.get('password', ''),
         scanning,
     )

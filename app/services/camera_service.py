@@ -1,6 +1,8 @@
 import sqlite3
 from typing import Dict, List, Optional
 
+from ..models.camera import build_url
+
 DB_PATH = "cameras.db"
 
 
@@ -59,7 +61,9 @@ def get(camera_id: int) -> Optional[Dict]:
     return _row_to_dict(row) if row else None
 
 
-def create(name: str, zone: str, ip_address: str, url: str, password: str, scanning: bool = False) -> None:
+def create(name: str, zone: str, ip_address: str, password: str, scanning: bool = False) -> None:
+    """Create a new camera and generate its stream URL."""
+    url = build_url(ip_address, password)
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
@@ -70,7 +74,9 @@ def create(name: str, zone: str, ip_address: str, url: str, password: str, scann
     conn.close()
 
 
-def update(camera_id: int, name: str, zone: str, ip_address: str, url: str, password: str, scanning: bool = False) -> None:
+def update(camera_id: int, name: str, zone: str, ip_address: str, password: str, scanning: bool = False) -> None:
+    """Update an existing camera, regenerating its URL."""
+    url = build_url(ip_address, password)
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
