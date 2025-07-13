@@ -4,6 +4,44 @@
 <img src="{{ url_for('cameras.video_feed', camera_id=camera.id) }}" width="720" />
 <p class="mt-2">Scanning: {{ 'Yes' if camera.scanning else 'No' }}</p>
 <form class="mt-2" action="{{ url_for('cameras.toggle_scanning', camera_id=camera.id) }}" method="post">
-  <button class="bg-blue-600 text-white px-4 py-1" type="submit">Scan</button>
+  <button class="bg-blue-600 text-white px-4 py-1" type="submit">
+    {{ 'Stop Scan' if camera.scanning else 'Scan' }}
+  </button>
 </form>
+
+<h2 class="text-lg font-bold mt-4">Recent Scans</h2>
+<table class="table-auto w-full border mt-2">
+  <tr class="bg-gray-200">
+    <th class="px-2 py-1">Code</th>
+    <th class="px-2 py-1">Timestamp</th>
+  </tr>
+  {% for scan in scans %}
+  <tr class="border-t">
+    <td class="px-2 py-1">{{ scan.code }}</td>
+    <td class="px-2 py-1">{{ scan.timestamp }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
+<script>
+  let lastTime = 0;
+  async function checkScan() {
+    try {
+      const resp = await fetch('{{ url_for('webcam.last_scan') }}');
+      if (!resp.ok) return;
+      const data = await resp.json();
+      const ts = data.lastScannedAt || 0;
+      if (ts > lastTime) {
+        lastTime = ts;
+        document.body.classList.add('scan-success');
+        setTimeout(() => {
+          document.body.classList.remove('scan-success');
+        }, 500);
+      }
+    } catch (e) {
+      // ignore errors
+    }
+  }
+  setInterval(checkScan, 1000);
+</script>
 {% endblock %}

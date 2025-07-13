@@ -1,5 +1,5 @@
 from flask import Blueprint, render_template, request, redirect, url_for, Response
-from ..services import camera_service, ip_camera_service
+from ..services import camera_service, ip_camera_service, barcode_service
 
 bp = Blueprint('cameras', __name__, url_prefix='/cameras')
 
@@ -58,7 +58,8 @@ def view_camera(camera_id: int):
     camera = camera_service.get(camera_id)
     if not camera:
         return 'Camera not found', 404
-    return render_template('cameras/view.html', camera=camera)
+    scans = barcode_service.get_all()
+    return render_template('cameras/view.html', camera=camera, scans=scans)
 
 
 @bp.route('/<int:camera_id>/toggle_scanning', methods=['POST'])
