@@ -2,7 +2,7 @@ import os
 import time
 from dotenv import load_dotenv
 
-from detector import BarcodeDetector
+from .detector import BarcodeDetector
 
 load_dotenv()
 
