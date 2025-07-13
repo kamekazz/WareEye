@@ -1,11 +1,12 @@
 from flask import Blueprint, Response, render_template
-from ..services import webcam_service
+from ..services import webcam_service, barcode_service
 
 bp = Blueprint('webcam', __name__)
 
 @bp.route('/')
 def index():
-    return render_template('index.html')
+    scans = barcode_service.get_all()
+    return render_template('index.html', scans=scans)
 
 
 def generate():

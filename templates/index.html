@@ -1,7 +1,22 @@
 {% extends 'base.html' %}
 {% block content %}
 <h1 class="text-xl font-bold mb-4">Webcam Feed</h1>
-<img id="feed" src="{{ url_for('webcam.video_feed') }}" width="720"/>
+<img src="{{ url_for('webcam.video_feed') }}" width="720"/>
+
+<h2 class="text-lg font-bold mt-4">Recent Scans</h2>
+<table class="table-auto w-full border mt-2">
+  <tr class="bg-gray-200">
+    <th class="px-2 py-1">Code</th>
+    <th class="px-2 py-1">Timestamp</th>
+  </tr>
+  {% for scan in scans %}
+  <tr class="border-t">
+    <td class="px-2 py-1">{{ scan.code }}</td>
+    <td class="px-2 py-1">{{ scan.timestamp }}</td>
+  </tr>
+  {% endfor %}
+</table>
+
 <div class="mt-4 space-x-2">
   <a href="{{ url_for('cameras.list_cameras') }}" class="bg-gray-800 text-white px-3 py-1">View Cameras</a>
   <a href="{{ url_for('cameras.new_camera_form') }}" class="bg-gray-800 text-white px-3 py-1">Add Camera</a>
