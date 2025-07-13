@@ -14,9 +14,15 @@ def init_db() -> None:
             zone TEXT,
             ip_address TEXT,
             url TEXT,
-            password TEXT
+            password TEXT,
+            scanning INTEGER DEFAULT 0
         )"""
     )
+    # Add scanning column if the table already existed without it
+    c.execute("PRAGMA table_info(cameras)")
+    cols = [r[1] for r in c.fetchall()]
+    if "scanning" not in cols:
+        c.execute("ALTER TABLE cameras ADD COLUMN scanning INTEGER DEFAULT 0")
     conn.commit()
     conn.close()
 
@@ -29,6 +35,7 @@ def _row_to_dict(row: sqlite3.Row) -> Dict:
         "ip_address": row["ip_address"],
         "url": row["url"],
         "password": row["password"],
+        "scanning": bool(row["scanning"]),
     }
 
 
@@ -52,25 +59,25 @@ def get(camera_id: int) -> Optional[Dict]:
     return _row_to_dict(row) if row else None
 
 
-def create(name: str, zone: str, ip_address: str, url: str, password: str) -> None:
+def create(name: str, zone: str, ip_address: str, url: str, password: str, scanning: bool = False) -> None:
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
-        "INSERT INTO cameras (name, zone, ip_address, url, password) VALUES (?, ?, ?, ?, ?)",
-        (name, zone, ip_address, url, password),
+        "INSERT INTO cameras (name, zone, ip_address, url, password, scanning) VALUES (?, ?, ?, ?, ?, ?)",
+        (name, zone, ip_address, url, password, int(scanning)),
     )
     conn.commit()
     conn.close()
 
 
-def update(camera_id: int, name: str, zone: str, ip_address: str, url: str, password: str) -> None:
+def update(camera_id: int, name: str, zone: str, ip_address: str, url: str, password: str, scanning: bool = False) -> None:
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
     c.execute(
         """UPDATE cameras
-           SET name=?, zone=?, ip_address=?, url=?, password=?
+           SET name=?, zone=?, ip_address=?, url=?, password=?, scanning=?
            WHERE id=?""",
-        (name, zone, ip_address, url, password, camera_id),
+        (name, zone, ip_address, url, password, int(scanning), camera_id),
     )
     conn.commit()
     conn.close()

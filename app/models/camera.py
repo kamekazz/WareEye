@@ -9,3 +9,4 @@ class Camera:
     ip_address: str
     url: str
     password: str
+    scanning: bool = False
