@@ -3,6 +3,7 @@ import time
 from typing import Dict, List
 
 DB_PATH = "scans.db"
+_last_scanned_at = 0
 
 
 def init_db() -> None:
@@ -31,6 +32,8 @@ def save_scan(code: str, cooldown: int = 5) -> None:
     if row is None or now - row[0] > cooldown:
         c.execute("INSERT INTO scans (code, timestamp) VALUES (?, ?)", (code, now))
         conn.commit()
+        global _last_scanned_at
+        _last_scanned_at = now
     conn.close()
 
 
@@ -49,3 +52,14 @@ def get_all() -> List[Dict]:
         }
         for r in rows
     ]
+
+
+def get_last_timestamp() -> int:
+    if _last_scanned_at:
+        return _last_scanned_at
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT MAX(timestamp) FROM scans")
+    row = c.fetchone()
+    conn.close()
+    return row[0] or 0

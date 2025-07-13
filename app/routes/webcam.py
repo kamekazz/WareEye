@@ -1,4 +1,4 @@
-from flask import Blueprint, Response, render_template
+from flask import Blueprint, Response, render_template, jsonify
 from ..services import webcam_service, barcode_service
 
 bp = Blueprint('webcam', __name__)
@@ -17,3 +17,9 @@ def generate():
 @bp.route('/video_feed')
 def video_feed():
     return Response(generate(), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@bp.route('/last_scan')
+def last_scan():
+    ts = barcode_service.get_last_timestamp()
+    return jsonify({'lastScannedAt': ts})
