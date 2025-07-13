@@ -1,0 +1,5 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="text-xl font-bold mb-4">{{ camera.name }}</h1>
+<img src="{{ url_for('cameras.video_feed', camera_id=camera.id) }}" width="720" />
+{% endblock %}
