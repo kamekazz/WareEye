@@ -1,4 +1,4 @@
-from flask import Blueprint, Response, render_template_string
+from flask import Blueprint, Response, render_template
 from ..services.detector_service import (
     frames,
     start as start_detection,
@@ -8,19 +8,9 @@ from ..services.detector_service import (
 
 bp = Blueprint('detector', __name__)
 
-INDEX_HTML = """
-<!doctype html>
-<title>WareEye Stream</title>
-<h1>Live Pallet Barcode Detection</h1>
-<img id=\"feed\" src=\"/video_feed\" width=\"720\"/>
-<br>
-<button onclick=\"fetch('/start')\">Start</button>
-<button onclick=\"fetch('/stop')\">Stop</button>
-"""
-
 @bp.route('/')
 def index():
-    return render_template_string(INDEX_HTML)
+    return render_template('index.html')
 
 
 def generate():
