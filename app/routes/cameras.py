@@ -14,13 +14,15 @@ def new_camera_form():
 
 @bp.route('/', methods=['POST'])
 def create_camera():
+    # Treat missing checkbox value as False when creating the camera
+    scanning = request.form.get('scanning') is not None
     camera_service.create(
         request.form.get('name', ''),
         request.form.get('zone', ''),
         request.form.get('ip_address', ''),
         request.form.get('url', ''),
         request.form.get('password', ''),
-        bool(request.form.get('scanning')),
+        scanning,
     )
     return redirect(url_for('cameras.list_cameras'))
 
@@ -33,6 +35,8 @@ def edit_camera_form(camera_id: int):
 
 @bp.route('/<int:camera_id>', methods=['POST'])
 def update_camera(camera_id: int):
+    # Checkbox not present when unchecked, so default to False
+    scanning = request.form.get('scanning') is not None
     camera_service.update(
         camera_id,
         request.form.get('name', ''),
@@ -40,7 +44,7 @@ def update_camera(camera_id: int):
         request.form.get('ip_address', ''),
         request.form.get('url', ''),
         request.form.get('password', ''),
-        bool(request.form.get('scanning')),
+        scanning,
     )
     return redirect(url_for('cameras.list_cameras'))
 
