@@ -2,4 +2,8 @@
 {% block content %}
 <h1 class="text-xl font-bold mb-4">{{ camera.name }}</h1>
 <img src="{{ url_for('cameras.video_feed', camera_id=camera.id) }}" width="720" />
+<p class="mt-2">Scanning: {{ 'Yes' if camera.scanning else 'No' }}</p>
+<form class="mt-2" action="{{ url_for('cameras.toggle_scanning', camera_id=camera.id) }}" method="post">
+  <button class="bg-blue-600 text-white px-4 py-1" type="submit">Scan</button>
+</form>
 {% endblock %}

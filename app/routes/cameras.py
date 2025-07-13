@@ -61,6 +61,15 @@ def view_camera(camera_id: int):
     return render_template('cameras/view.html', camera=camera)
 
 
+@bp.route('/<int:camera_id>/toggle_scanning', methods=['POST'])
+def toggle_scanning(camera_id: int):
+    """Toggle the scanning state for the given camera."""
+    new_state = camera_service.toggle_scanning(camera_id)
+    if new_state is None:
+        return 'Camera not found', 404
+    return redirect(url_for('cameras.view_camera', camera_id=camera_id))
+
+
 def _stream_generator(url: str):
     for frame in ip_camera_service.frames(url):
         yield b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + frame + b"\r\n"
