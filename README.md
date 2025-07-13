@@ -31,7 +31,10 @@ attempts to lock exposure, white balance and focus where supported. Adjust these
 parameters in `webcam_service.py` if your hardware requires different values.
 Frames are converted to grayscale and passed through CLAHE (adaptive histogram
 equalization) before barcode decoding to improve contrast and reliability under
-varying lighting conditions.
+varying lighting conditions. Decoding is handled by a small worker pool so the
+capture loop never blocks. Frames are skipped when the decode queue is full,
+keeping the system responsive even if decoding is slower than the camera frame
+rate.
 
 ## Project Structure
 
