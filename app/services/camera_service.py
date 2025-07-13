@@ -95,3 +95,22 @@ def delete(camera_id: int) -> None:
     c.execute("DELETE FROM cameras WHERE id=?", (camera_id,))
     conn.commit()
     conn.close()
+
+
+def toggle_scanning(camera_id: int) -> Optional[bool]:
+    """Toggle the scanning flag for a camera and return the new state.
+
+    Returns ``None`` if the camera does not exist."""
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute("SELECT scanning FROM cameras WHERE id=?", (camera_id,))
+    row = c.fetchone()
+    if row is None:
+        conn.close()
+        return None
+
+    new_value = 0 if row[0] else 1
+    c.execute("UPDATE cameras SET scanning=? WHERE id=?", (new_value, camera_id))
+    conn.commit()
+    conn.close()
+    return bool(new_value)
