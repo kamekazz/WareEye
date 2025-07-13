@@ -19,7 +19,8 @@
     <td class="px-2 py-1">{{ cam.url }}</td>
     <td class="px-2 py-1">{{ 'Yes' if cam.scanning else 'No' }}</td>
     <td class="px-2 py-1">
-      <a class="text-blue-600" href="{{ url_for('cameras.edit_camera_form', camera_id=cam.id) }}">Edit</a>
+      <a class="text-blue-600 mr-2" href="{{ url_for('cameras.view_camera', camera_id=cam.id) }}">View</a>
+      <a class="text-blue-600 mr-2" href="{{ url_for('cameras.edit_camera_form', camera_id=cam.id) }}">Edit</a>
       <form action="{{ url_for('cameras.delete_camera', camera_id=cam.id) }}" method="post" style="display:inline;">
         <button class="text-red-600" type="submit" onclick="return confirm('Delete camera?');">Delete</button>
       </form>

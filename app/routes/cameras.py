@@ -1,5 +1,5 @@
-from flask import Blueprint, render_template, request, redirect, url_for
-from ..services import camera_service
+from flask import Blueprint, render_template, request, redirect, url_for, Response
+from ..services import camera_service, ip_camera_service
 
 bp = Blueprint('cameras', __name__, url_prefix='/cameras')
 
@@ -50,3 +50,25 @@ def update_camera(camera_id: int):
 def delete_camera(camera_id: int):
     camera_service.delete(camera_id)
     return redirect(url_for('cameras.list_cameras'))
+
+
+@bp.route('/<int:camera_id>/view')
+def view_camera(camera_id: int):
+    """Render a page displaying the camera stream."""
+    camera = camera_service.get(camera_id)
+    if not camera:
+        return 'Camera not found', 404
+    return render_template('cameras/view.html', camera=camera)
+
+
+def _stream_generator(url: str):
+    for frame in ip_camera_service.frames(url):
+        yield b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + frame + b"\r\n"
+
+
+@bp.route('/<int:camera_id>/video_feed')
+def video_feed(camera_id: int):
+    camera = camera_service.get(camera_id)
+    if not camera:
+        return 'Camera not found', 404
+    return Response(_stream_generator(camera['url']), mimetype='multipart/x-mixed-replace; boundary=frame')
