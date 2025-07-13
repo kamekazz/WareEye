@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="text-xl font-bold mb-4">{{ 'Edit' if camera else 'Add' }} Camera</h1>
+<form class="space-y-2" action="{{ action }}" method="post">
+  <label class="block">Name:<input class="border" type="text" name="name" value="{{ camera.name if camera else '' }}" required></label>
+  <label class="block">Zone:<input class="border" type="text" name="zone" value="{{ camera.zone if camera else '' }}"></label>
+  <label class="block">IP Address:<input class="border" type="text" name="ip_address" value="{{ camera.ip_address if camera else '' }}"></label>
+  <label class="block">URL:<input class="border" type="text" name="url" value="{{ camera.url if camera else '' }}"></label>
+  <label class="block">Password:<input class="border" type="password" name="password" value="{{ camera.password if camera else '' }}"></label>
+  <button class="bg-blue-600 text-white px-4 py-1" type="submit">Save</button>
+  <a class="text-gray-600" href="{{ url_for('cameras.list_cameras') }}">Cancel</a>
+</form>
+{% endblock %}

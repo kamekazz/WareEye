@@ -29,3 +29,12 @@ Start the services using the provided script:
 Then open your browser and navigate to `http://localhost:5000/` to view the live stream.
 
 The `/healthz` endpoint exposes a basic health check for the Flask application and detection thread.
+
+## Project Structure
+
+- `app/routes/` – Flask blueprints with HTTP endpoints
+- `app/services/` – business logic modules with no Flask dependencies
+- `app/models/` – data class definitions
+- `templates/` – Jinja2 templates organized by feature
+- `static/` – static assets (Tailwind via CDN)
+
