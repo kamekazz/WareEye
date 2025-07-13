@@ -4,7 +4,8 @@ from .services import camera_service
 
 def create_app() -> Flask:
     camera_service.init_db()
-    app = Flask(__name__)
+
+    app = Flask(__name__, template_folder="../templates")
 
     from .routes import detector, cameras
 
