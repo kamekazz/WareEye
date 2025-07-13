@@ -31,22 +31,27 @@ class BarcodeDetector(threading.Thread):
         conn.close()
 
     def connect(self):
+        """(Re)connect to the camera stream using FFMPEG with TCP transport."""
         if self.cap:
             self.cap.release()
-        self.cap = cv2.VideoCapture(self.stream_url)
+        self.cap = cv2.VideoCapture(self.stream_url, cv2.CAP_FFMPEG)
 
     def run(self):
         self.running.set()
+        failures = 0
         while self.running.is_set():
             if self.cap is None or not self.cap.isOpened():
                 self.connect()
-                time.sleep(1)
+                failures += 1
+                time.sleep(min(5, 2 ** failures))
                 continue
             ret, frame = self.cap.read()
             if not ret:
                 self.connect()
-                time.sleep(1)
+                failures += 1
+                time.sleep(min(5, 2 ** failures))
                 continue
+            failures = 0
             processed = self.process_frame(frame)
             with self.frame_lock:
                 self.current_frame = processed
