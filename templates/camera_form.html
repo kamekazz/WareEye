@@ -1,0 +1,13 @@
+<!doctype html>
+<title>{{ 'Edit' if camera else 'Add' }} Camera</title>
+<h1>{{ 'Edit' if camera else 'Add' }} Camera</h1>
+<form action="{{ action }}" method="post">
+  <label>Name:<input type="text" name="name" value="{{ camera.name if camera else '' }}" required></label><br>
+  <label>Zone:<input type="text" name="zone" value="{{ camera.zone if camera else '' }}"></label><br>
+  <label>IP Address:<input type="text" name="ip_address" value="{{ camera.ip_address if camera else '' }}"></label><br>
+  <label>URL:<input type="text" name="url" value="{{ camera.url if camera else '' }}"></label><br>
+  <label>Password:<input type="password" name="password" value="{{ camera.password if camera else '' }}"></label><br>
+  <button type="submit">Save</button>
+  <a href="{{ url_for('list_cameras') }}">Cancel</a>
+</form>
+
