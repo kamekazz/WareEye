@@ -1,6 +1,7 @@
 # WareEye
 
-This repository contains a simple OpenCV application served through a Flask web interface.
+WareEye provides a Flask interface that connects to a Reolink camera and performs
+real-time pallet barcode detection and tracking.
 
 ## Setup
 
@@ -10,12 +11,21 @@ Install the required dependencies using `pip`:
 pip install -r requirements.txt
 ```
 
-## Running the App
+Create a `.env` file with your camera credentials:
 
-Start the Flask development server:
-
-```bash
-python app.py
+```ini
+CAMERA_IP=192.168.1.163
+CAMERA_PASS=your_password
 ```
 
-Open your browser and navigate to `http://localhost:5000`. Upload an image to see the grayscale result generated with OpenCV.
+## Running the App
+
+Start the services using the provided script:
+
+```bash
+./start-services.sh
+```
+
+Then open your browser and navigate to `http://localhost:5000/` to view the live stream.
+
+The `/healthz` endpoint exposes a basic health check for the Flask application and detection thread.
