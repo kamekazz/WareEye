@@ -7,6 +7,9 @@
   <label class="block">IP Address:<input class="border" type="text" name="ip_address" value="{{ camera.ip_address if camera else '' }}"></label>
   <label class="block">URL:<input class="border" type="text" name="url" value="{{ camera.url if camera else '' }}"></label>
   <label class="block">Password:<input class="border" type="password" name="password" value="{{ camera.password if camera else '' }}"></label>
+  <label class="block">Scanning:
+    <input type="checkbox" name="scanning" {% if camera and camera.scanning %}checked{% endif %}>
+  </label>
   <button class="bg-blue-600 text-white px-4 py-1" type="submit">Save</button>
   <a class="text-gray-600" href="{{ url_for('cameras.list_cameras') }}">Cancel</a>
 </form>
