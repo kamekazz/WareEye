@@ -11,7 +11,8 @@ _cap = cv2.VideoCapture(0)
 try:
     _cap.set(cv2.CAP_PROP_AUTO_EXPOSURE, 0.25)
     _cap.set(cv2.CAP_PROP_AUTO_WB, 0)
-    _cap.set(cv2.CAP_PROP_AUTOFOCUS, 0)
+     # Enable autofocus to ensure the image stays sharp.
+    _cap.set(cv2.CAP_PROP_AUTOFOCUS, 1)
 except Exception:
     pass
 
