@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1 class="text-xl font-bold mb-4">Live Pallet Barcode Detection</h1>
+<img id="feed" src="{{ url_for('detector.video_feed') }}" width="720"/>
+<div class="mt-2">
+  <button onclick="fetch('{{ url_for('detector.start') }}')" class="bg-blue-600 text-white px-4 py-1 mr-2">Start</button>
+  <button onclick="fetch('{{ url_for('detector.stop') }}')" class="bg-red-600 text-white px-4 py-1">Stop</button>
+</div>
+<div class="mt-4 space-x-2">
+  <a href="{{ url_for('cameras.list_cameras') }}" class="bg-gray-800 text-white px-3 py-1">View Cameras</a>
+  <a href="{{ url_for('cameras.new_camera_form') }}" class="bg-gray-800 text-white px-3 py-1">Add Camera</a>
+</div>
+{% endblock %}
