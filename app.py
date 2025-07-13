@@ -1,20 +1,13 @@
-import os
-import time
-from io import BytesIO
-from dotenv import load_dotenv
 from flask import Flask, Response, render_template_string
 
-from detector import BarcodeDetector
-
-load_dotenv()
-
-CAMERA_IP = os.getenv("CAMERA_IP", "192.168.1.163")
-CAMERA_PASS = os.getenv("CAMERA_PASS", "")
-STREAM_URL = f"rtsp://admin:{CAMERA_PASS}@{CAMERA_IP}:554/h264Preview_01_main"
+from services.detector_service import (
+    frames,
+    start as start_detection,
+    stop as stop_detection,
+    health as detector_health,
+)
 
 app = Flask(__name__)
-
-detector = BarcodeDetector(STREAM_URL)
 
 INDEX_HTML = """
 <!doctype html>
@@ -31,13 +24,9 @@ def index():
     return render_template_string(INDEX_HTML)
 
 
+# Stream video frames from the detector service
 def generate():
-    while True:
-        frame = detector.get_frame()
-        if frame is None:
-            time.sleep(0.1)
-            continue
-        yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + frame + b"\r\n")
+    yield from frames()
 
 @app.route("/video_feed")
 def video_feed():
@@ -45,20 +34,18 @@ def video_feed():
 
 @app.route("/start")
 def start():
-    if not detector.is_alive():
-        detector.start()
+    start_detection()
     return "started"
 
 @app.route("/stop")
 def stop():
-    detector.stop()
+    stop_detection()
     return "stopped"
 
 @app.route("/healthz")
 def healthz():
-    status = "ok" if detector.is_alive() else "detector stopped"
-    return status
+    return detector_health()
 
 if __name__ == "__main__":
-    detector.start()
+    start_detection()
     app.run(host="0.0.0.0", port=5000)
