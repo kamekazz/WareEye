@@ -5,7 +5,6 @@
   <label class="block">Name:<input class="border" type="text" name="name" value="{{ camera.name if camera else '' }}" required></label>
   <label class="block">Zone:<input class="border" type="text" name="zone" value="{{ camera.zone if camera else '' }}"></label>
   <label class="block">IP Address:<input class="border" type="text" name="ip_address" value="{{ camera.ip_address if camera else '' }}"></label>
-  <label class="block">URL:<input class="border" type="text" name="url" value="{{ camera.url if camera else '' }}"></label>
   <label class="block">Password:<input class="border" type="password" name="password" value="{{ camera.password if camera else '' }}"></label>
   <label class="block">Scanning:
     <input type="checkbox" name="scanning" {% if camera and camera.scanning %}checked{% endif %}>
