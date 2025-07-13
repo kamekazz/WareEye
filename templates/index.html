@@ -17,8 +17,29 @@
   {% endfor %}
 </table>
 
-<div class="mt-4 space-x-2">
-  <a href="{{ url_for('cameras.list_cameras') }}" class="bg-gray-800 text-white px-3 py-1">View Cameras</a>
-  <a href="{{ url_for('cameras.new_camera_form') }}" class="bg-gray-800 text-white px-3 py-1">Add Camera</a>
-</div>
+  <div class="mt-4 space-x-2">
+    <a href="{{ url_for('cameras.list_cameras') }}" class="bg-gray-800 text-white px-3 py-1">View Cameras</a>
+    <a href="{{ url_for('cameras.new_camera_form') }}" class="bg-gray-800 text-white px-3 py-1">Add Camera</a>
+  </div>
+  <script>
+    let lastTime = 0;
+    async function checkScan() {
+      try {
+        const resp = await fetch('{{ url_for('webcam.last_scan') }}');
+        if (!resp.ok) return;
+        const data = await resp.json();
+        const ts = data.lastScannedAt || 0;
+        if (ts > lastTime) {
+          lastTime = ts;
+          document.body.classList.add('scan-success');
+          setTimeout(() => {
+            document.body.classList.remove('scan-success');
+          }, 500);
+        }
+      } catch (e) {
+        // ignore errors
+      }
+    }
+    setInterval(checkScan, 1000);
+  </script>
 {% endblock %}
