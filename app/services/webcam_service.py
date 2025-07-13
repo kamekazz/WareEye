@@ -59,7 +59,11 @@ def frames():
         if jpg is None:
             continue
         gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        for code in decode(gray, symbols=[ZBarSymbol.QRCODE]):
+        # Boost contrast to make barcode lines more distinct. CLAHE works well
+        # under varying lighting conditions.
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        enhanced = clahe.apply(gray)
+        for code in decode(enhanced, symbols=[ZBarSymbol.QRCODE]):
             try:
                 text = code.data.decode("utf-8")
             except Exception:
