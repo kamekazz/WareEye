@@ -19,7 +19,11 @@ except Exception:
 
 _lock = threading.Lock()
 _frame_queue: "queue.Queue[cv2.Mat]" = queue.Queue(maxsize=1)
+_decode_queue: "queue.Queue[cv2.Mat]" = queue.Queue(maxsize=5)
 _stop_event = threading.Event()
+_frame_counter = 0
+_FRAME_SKIP = 3  # Only decode every Nth frame (approx 10 FPS if capture is 30 FPS)
+_NUM_WORKERS = 2
 
 
 def _capture_loop() -> None:
@@ -37,9 +41,47 @@ def _capture_loop() -> None:
                 pass
         _frame_queue.put(frame)
 
+        global _frame_counter
+        _frame_counter += 1
+        if _frame_counter % _FRAME_SKIP == 0:
+            if not _decode_queue.full():
+                try:
+                    _decode_queue.put_nowait(frame.copy())
+                except queue.Full:
+                    pass
+
 
 _thread = threading.Thread(target=_capture_loop, daemon=True)
 _thread.start()
+
+
+def _decode_loop() -> None:
+    """Worker thread that decodes frames asynchronously."""
+    while not _stop_event.is_set():
+        try:
+            frame = _decode_queue.get(timeout=0.1)
+        except queue.Empty:
+            continue
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
+        enhanced = clahe.apply(gray)
+        roi = _find_qr_region(enhanced)
+        cropped = enhanced
+        if roi is not None:
+            x, y, w, h = roi
+            cropped = enhanced[y : y + h, x : x + w]
+        for code in decode(cropped, symbols=[ZBarSymbol.QRCODE]):
+            try:
+                text = code.data.decode("utf-8")
+            except Exception:
+                continue
+            barcode_service.save_scan(text)
+        _decode_queue.task_done()
+
+
+for _ in range(_NUM_WORKERS):
+    t = threading.Thread(target=_decode_loop, daemon=True)
+    t.start()
 
 
 def _find_qr_region(gray: cv2.Mat) -> Optional[Tuple[int, int, int, int]]:
@@ -78,25 +120,9 @@ def get_frame():
 
 
 def frames():
-    """Generator yielding JPEG-encoded frames with barcode decoding."""
+    """Generator yielding JPEG-encoded frames for streaming."""
     while True:
         frame, jpg = get_frame()
         if jpg is None:
             continue
-        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        # Boost contrast to make barcode lines more distinct. CLAHE works well
-        # under varying lighting conditions.
-        clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
-        enhanced = clahe.apply(gray)
-        roi = _find_qr_region(enhanced)
-        cropped = enhanced
-        if roi is not None:
-            x, y, w, h = roi
-            cropped = enhanced[y : y + h, x : x + w]
-        for code in decode(cropped, symbols=[ZBarSymbol.QRCODE]):
-            try:
-                text = code.data.decode("utf-8")
-            except Exception:
-                continue
-            barcode_service.save_scan(text)
         yield jpg
