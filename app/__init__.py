@@ -7,9 +7,9 @@ def create_app() -> Flask:
 
     app = Flask(__name__, template_folder="../templates")
 
-    from .routes import detector, cameras
+    from .routes import webcam, cameras
 
-    app.register_blueprint(detector.bp)
+    app.register_blueprint(webcam.bp)
     app.register_blueprint(cameras.bp)
 
     return app
