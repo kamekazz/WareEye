@@ -1,7 +1,7 @@
 # WareEye
 
 WareEye provides a simple Flask interface that streams video from your local
-webcam.
+webcam and logs any barcodes detected in real time.
 
 ## Setup
 
@@ -11,7 +11,8 @@ Install the required dependencies using `pip`:
 pip install -r requirements.txt
 ```
 
-No additional configuration is required; the app uses webcam device `0`.
+No additional configuration is required; the app uses webcam device `0`. The
+requirements include `pyzbar` for decoding barcodes.
 
 ## Running the App
 
