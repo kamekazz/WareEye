@@ -1,7 +1,7 @@
 import cv2
 import threading
 import queue
-from pyzbar import pyzbar
+from pyzbar.pyzbar import decode, ZBarSymbol
 
 from . import barcode_service
 
@@ -58,7 +58,8 @@ def frames():
         frame, jpg = get_frame()
         if jpg is None:
             continue
-        for code in pyzbar.decode(frame):
+        gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+        for code in decode(gray, symbols=[ZBarSymbol.QRCODE]):
             try:
                 text = code.data.decode("utf-8")
             except Exception:
