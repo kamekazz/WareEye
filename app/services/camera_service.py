@@ -1,6 +1,8 @@
 import sqlite3
 from typing import Dict, List, Optional
 
+from . import ip_camera_service
+
 from ..models.camera import build_url
 
 DB_PATH = "cameras.db"
@@ -102,15 +104,22 @@ def toggle_scanning(camera_id: int) -> Optional[bool]:
 
     Returns ``None`` if the camera does not exist."""
     conn = sqlite3.connect(DB_PATH)
+    conn.row_factory = sqlite3.Row
     c = conn.cursor()
-    c.execute("SELECT scanning FROM cameras WHERE id=?", (camera_id,))
+    c.execute("SELECT scanning, url FROM cameras WHERE id=?", (camera_id,))
     row = c.fetchone()
     if row is None:
         conn.close()
         return None
 
-    new_value = 0 if row[0] else 1
+    new_value = 0 if row["scanning"] else 1
     c.execute("UPDATE cameras SET scanning=? WHERE id=?", (new_value, camera_id))
     conn.commit()
     conn.close()
+
+    if new_value:
+        ip_camera_service.start_scanning(camera_id, row["url"])
+    else:
+        ip_camera_service.stop_scanning(camera_id)
+
     return bool(new_value)
