@@ -1,38 +1,64 @@
-import cv2
-import numpy as np
-from flask import Flask, request, render_template_string, send_file
+import os
+import time
 from io import BytesIO
+from dotenv import load_dotenv
+from flask import Flask, Response, render_template_string
+
+from detector import BarcodeDetector
+
+load_dotenv()
+
+CAMERA_IP = os.getenv("CAMERA_IP", "192.168.1.163")
+CAMERA_PASS = os.getenv("CAMERA_PASS", "")
+STREAM_URL = f"rtsp://admin:{CAMERA_PASS}@{CAMERA_IP}:554/h264Preview_01_main"
 
 app = Flask(__name__)
 
-INDEX_HTML = '''
-<!doctype html>
-<title>OpenCV Flask App</title>
-<h1>Upload an image to convert to grayscale</h1>
-<form method=post enctype=multipart/form-data action="/process">
-  <input type=file name=file>
-  <input type=submit value=Upload>
-</form>
-'''
+detector = BarcodeDetector(STREAM_URL)
 
-@app.route('/')
+INDEX_HTML = """
+<!doctype html>
+<title>WareEye Stream</title>
+<h1>Live Pallet Barcode Detection</h1>
+<img id="feed" src="/video_feed" width="720"/>
+<br>
+<button onclick="fetch('/start')">Start</button>
+<button onclick="fetch('/stop')">Stop</button>
+"""
+
+@app.route("/")
 def index():
     return render_template_string(INDEX_HTML)
 
-@app.route('/process', methods=['POST'])
-def process():
-    file = request.files.get('file')
-    if not file:
-        return "No file uploaded", 400
 
-    file_bytes = np.frombuffer(file.read(), np.uint8)
-    img = cv2.imdecode(file_bytes, cv2.IMREAD_COLOR)
-    if img is None:
-        return "Invalid image", 400
+def generate():
+    while True:
+        frame = detector.get_frame()
+        if frame is None:
+            time.sleep(0.1)
+            continue
+        yield (b"--frame\r\nContent-Type: image/jpeg\r\n\r\n" + frame + b"\r\n")
 
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, buf = cv2.imencode('.png', gray)
-    return send_file(BytesIO(buf.tobytes()), mimetype='image/png')
+@app.route("/video_feed")
+def video_feed():
+    return Response(generate(), mimetype="multipart/x-mixed-replace; boundary=frame")
 
-if __name__ == '__main__':
-    app.run(debug=True)
+@app.route("/start")
+def start():
+    if not detector.is_alive():
+        detector.start()
+    return "started"
+
+@app.route("/stop")
+def stop():
+    detector.stop()
+    return "stopped"
+
+@app.route("/healthz")
+def healthz():
+    status = "ok" if detector.is_alive() else "detector stopped"
+    return status
+
+if __name__ == "__main__":
+    detector.start()
+    app.run(host="0.0.0.0", port=5000)

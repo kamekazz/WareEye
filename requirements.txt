@@ -1,2 +1,5 @@
 Flask
 opencv-python-headless
+numpy
+pyzbar
+python-dotenv
