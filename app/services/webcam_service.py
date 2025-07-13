@@ -2,6 +2,7 @@ import cv2
 import threading
 import queue
 from pyzbar.pyzbar import decode, ZBarSymbol
+from typing import Optional, Tuple
 
 from . import barcode_service
 
@@ -41,6 +42,30 @@ _thread = threading.Thread(target=_capture_loop, daemon=True)
 _thread.start()
 
 
+def _find_qr_region(gray: cv2.Mat) -> Optional[Tuple[int, int, int, int]]:
+    """Locate the largest square-like contour that could contain a QR code."""
+    edges = cv2.Canny(gray, 100, 200)
+    contours, _ = cv2.findContours(edges, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+    best_rect: Optional[Tuple[int, int, int, int]] = None
+    best_area = 0
+    for cnt in contours:
+        peri = cv2.arcLength(cnt, True)
+        approx = cv2.approxPolyDP(cnt, 0.02 * peri, True)
+        if len(approx) != 4 or not cv2.isContourConvex(approx):
+            continue
+        x, y, w, h = cv2.boundingRect(approx)
+        if h == 0:
+            continue
+        ratio = w / float(h)
+        if ratio < 0.8 or ratio > 1.2:
+            continue
+        area = w * h
+        if area > best_area:
+            best_area = area
+            best_rect = (x, y, w, h)
+    return best_rect
+
+
 def get_frame():
     """Retrieve the latest frame from the capture thread."""
     try:
@@ -63,7 +88,12 @@ def frames():
         # under varying lighting conditions.
         clahe = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8))
         enhanced = clahe.apply(gray)
-        for code in decode(enhanced, symbols=[ZBarSymbol.QRCODE]):
+        roi = _find_qr_region(enhanced)
+        cropped = enhanced
+        if roi is not None:
+            x, y, w, h = roi
+            cropped = enhanced[y : y + h, x : x + w]
+        for code in decode(cropped, symbols=[ZBarSymbol.QRCODE]):
             try:
                 text = code.data.decode("utf-8")
             except Exception:
