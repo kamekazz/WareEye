@@ -23,25 +23,5 @@
   {% endfor %}
 </table>
 
-<script>
-  let lastTime = 0;
-  async function checkScan() {
-    try {
-      const resp = await fetch('{{ url_for('webcam.last_scan') }}');
-      if (!resp.ok) return;
-      const data = await resp.json();
-      const ts = data.lastScannedAt || 0;
-      if (ts > lastTime) {
-        lastTime = ts;
-        document.body.classList.add('scan-success');
-        setTimeout(() => {
-          document.body.classList.remove('scan-success');
-        }, 500);
-      }
-    } catch (e) {
-      // ignore errors
-    }
-  }
-  setInterval(checkScan, 1000);
-</script>
+
 {% endblock %}
