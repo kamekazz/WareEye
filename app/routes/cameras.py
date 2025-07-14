@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, Response
+from flask import Blueprint, render_template, request, redirect, url_for, Response, jsonify
 from ..services import camera_service, ip_camera_service, barcode_service
 
 bp = Blueprint('cameras', __name__, url_prefix='/cameras')
@@ -59,7 +59,8 @@ def view_camera(camera_id: int):
     if not camera:
         return 'Camera not found', 404
     scans = barcode_service.get_all()
-    return render_template('cameras/view.html', camera=camera, scans=scans)
+    last_timestamp = barcode_service.get_last_timestamp()
+    return render_template('cameras/view.html', camera=camera, scans=scans, last_timestamp=last_timestamp)
 
 
 @bp.route('/<int:camera_id>/toggle_scanning', methods=['POST'])
@@ -69,6 +70,29 @@ def toggle_scanning(camera_id: int):
     if new_state is None:
         return 'Camera not found', 404
     return redirect(url_for('cameras.view_camera', camera_id=camera_id))
+
+
+@bp.route('/<int:camera_id>/start_scan', methods=['POST'])
+def start_scan(camera_id: int):
+    """Start scanning for the specified camera."""
+    camera = camera_service.get(camera_id)
+    if not camera:
+        return 'Camera not found', 404
+    ip_camera_service.start_scanning(camera_id, camera['url'])
+    return ('', 204)
+
+
+@bp.route('/<int:camera_id>/stop_scan', methods=['POST'])
+def stop_scan(camera_id: int):
+    """Stop scanning for the specified camera."""
+    ip_camera_service.stop_scanning(camera_id)
+    return ('', 204)
+
+
+@bp.route('/last_scan_timestamp')
+def last_scan_timestamp():
+    """Return the timestamp of the most recent scan."""
+    return jsonify(timestamp=barcode_service.get_last_timestamp())
 
 
 def _stream_generator(url: str):

@@ -2,12 +2,6 @@
 {% block content %}
 <h1 class="text-xl font-bold mb-4">{{ camera.name }}</h1>
 <img src="{{ url_for('cameras.video_feed', camera_id=camera.id) }}" width="720" />
-<p class="mt-2">Scanning: {{ 'Yes' if camera.scanning else 'No' }}</p>
-<form class="mt-2" action="{{ url_for('cameras.toggle_scanning', camera_id=camera.id) }}" method="post">
-  <button class="bg-blue-600 text-white px-4 py-1" type="submit">
-    {{ 'Stop Scan' if camera.scanning else 'Scan' }}
-  </button>
-</form>
 
 <h2 class="text-lg font-bold mt-4">Recent Scans</h2>
 <table class="table-auto w-full border mt-2">
@@ -22,6 +16,39 @@
   </tr>
   {% endfor %}
 </table>
+
+<script>
+  const cameraId = {{ camera.id }};
+  let lastTs = {{ last_timestamp }};
+
+  function start() {
+    fetch(`/cameras/${cameraId}/start_scan`, {method: 'POST'});
+  }
+
+  function stop() {
+    fetch(`/cameras/${cameraId}/stop_scan`, {method: 'POST', keepalive: true});
+  }
+
+  function checkForScans() {
+    fetch(`{{ url_for('cameras.last_scan_timestamp') }}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.timestamp > lastTs) {
+          lastTs = data.timestamp;
+          document.body.classList.add('scan-success');
+          setTimeout(() => {
+            document.body.classList.remove('scan-success');
+          }, 1500);
+        }
+      });
+  }
+
+  window.addEventListener('load', () => {
+    start();
+    setInterval(checkForScans, 1000);
+  });
+  window.addEventListener('beforeunload', stop);
+</script>
 
 
 {% endblock %}
