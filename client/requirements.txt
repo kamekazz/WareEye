@@ -1,4 +1,4 @@
-Flask
 opencv-python-headless
 numpy
 pyzbar
+requests

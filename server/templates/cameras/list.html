@@ -8,7 +8,6 @@
     <th class="px-2 py-1">Zone</th>
     <th class="px-2 py-1">IP Address</th>
     <th class="px-2 py-1">URL</th>
-    <th class="px-2 py-1">Scanning</th>
     <th class="px-2 py-1">Actions</th>
   </tr>
   {% for cam in cameras %}
@@ -17,7 +16,6 @@
     <td class="px-2 py-1">{{ cam.zone }}</td>
     <td class="px-2 py-1">{{ cam.ip_address }}</td>
     <td class="px-2 py-1">{{ cam.url }}</td>
-    <td class="px-2 py-1">{{ 'Yes' if cam.scanning else 'No' }}</td>
     <td class="px-2 py-1">
       <a class="text-blue-600 mr-2" href="{{ url_for('cameras.view_camera', camera_id=cam.id) }}">View</a>
       <a class="text-blue-600 mr-2" href="{{ url_for('cameras.edit_camera_form', camera_id=cam.id) }}">Edit</a>

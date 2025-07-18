@@ -13,7 +13,6 @@ class Camera:
     zone: str
     ip_address: str
     password: str
-    scanning: bool = False
     url: str = ""
 
     def __post_init__(self) -> None:
