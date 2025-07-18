@@ -14,14 +14,11 @@ def new_camera_form():
 
 @bp.route('/', methods=['POST'])
 def create_camera():
-    # Treat missing checkbox value as False when creating the camera
-    scanning = request.form.get('scanning') is not None
     camera_service.create(
         request.form.get('name', ''),
         request.form.get('zone', ''),
         request.form.get('ip_address', ''),
         request.form.get('password', ''),
-        scanning,
     )
     return redirect(url_for('cameras.list_cameras'))
 
@@ -34,15 +31,12 @@ def edit_camera_form(camera_id: int):
 
 @bp.route('/<int:camera_id>', methods=['POST'])
 def update_camera(camera_id: int):
-    # Checkbox not present when unchecked, so default to False
-    scanning = request.form.get('scanning') is not None
     camera_service.update(
         camera_id,
         request.form.get('name', ''),
         request.form.get('zone', ''),
         request.form.get('ip_address', ''),
         request.form.get('password', ''),
-        scanning,
     )
     return redirect(url_for('cameras.list_cameras'))
 
@@ -59,40 +53,9 @@ def view_camera(camera_id: int):
     if not camera:
         return 'Camera not found', 404
     scans = barcode_service.get_all()
-    last_timestamp = barcode_service.get_last_timestamp()
-    return render_template('cameras/view.html', camera=camera, scans=scans, last_timestamp=last_timestamp)
+    return render_template('cameras/view.html', camera=camera, scans=scans)
 
 
-@bp.route('/<int:camera_id>/toggle_scanning', methods=['POST'])
-def toggle_scanning(camera_id: int):
-    """Toggle the scanning state for the given camera."""
-    new_state = camera_service.toggle_scanning(camera_id)
-    if new_state is None:
-        return 'Camera not found', 404
-    return redirect(url_for('cameras.view_camera', camera_id=camera_id))
-
-
-@bp.route('/<int:camera_id>/start_scan', methods=['POST'])
-def start_scan(camera_id: int):
-    """Start scanning for the specified camera."""
-    camera = camera_service.get(camera_id)
-    if not camera:
-        return 'Camera not found', 404
-    ip_camera_service.start_scanning(camera_id, camera['url'])
-    return ('', 204)
-
-
-@bp.route('/<int:camera_id>/stop_scan', methods=['POST'])
-def stop_scan(camera_id: int):
-    """Stop scanning for the specified camera."""
-    ip_camera_service.stop_scanning(camera_id)
-    return ('', 204)
-
-
-@bp.route('/last_scan_timestamp')
-def last_scan_timestamp():
-    """Return the timestamp of the most recent scan."""
-    return jsonify(timestamp=barcode_service.get_last_timestamp())
 
 
 def _stream_generator(url: str):
@@ -106,3 +69,14 @@ def video_feed(camera_id: int):
     if not camera:
         return 'Camera not found', 404
     return Response(_stream_generator(camera['url']), mimetype='multipart/x-mixed-replace; boundary=frame')
+
+
+@bp.route('/api/scans', methods=['POST'])
+def submit_scan():
+    """Receive a barcode scan from a client."""
+    data = request.get_json(silent=True) or {}
+    code = data.get('code')
+    if not code:
+        return jsonify({'error': 'missing code'}), 400
+    barcode_service.save_scan(code)
+    return ('', 204)

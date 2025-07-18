@@ -17,38 +17,6 @@
   {% endfor %}
 </table>
 
-<script>
-  const cameraId = {{ camera.id }};
-  let lastTs = {{ last_timestamp }};
-
-  function start() {
-    fetch(`/cameras/${cameraId}/start_scan`, {method: 'POST'});
-  }
-
-  function stop() {
-    fetch(`/cameras/${cameraId}/stop_scan`, {method: 'POST', keepalive: true});
-  }
-
-  function checkForScans() {
-    fetch(`{{ url_for('cameras.last_scan_timestamp') }}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.timestamp > lastTs) {
-          lastTs = data.timestamp;
-          document.body.classList.add('scan-success');
-          setTimeout(() => {
-            document.body.classList.remove('scan-success');
-          }, 1500);
-        }
-      });
-  }
-
-  window.addEventListener('load', () => {
-    start();
-    setInterval(checkForScans, 1000);
-  });
-  window.addEventListener('beforeunload', stop);
-</script>
 
 
 {% endblock %}
