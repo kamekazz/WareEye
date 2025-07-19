@@ -61,16 +61,17 @@ def main() -> None:
         args.wechat_sr_prototxt,
         args.wechat_sr_model,
     )
-
-    camera_url = 0
+    CAMERA_PASS = 'titalovA'
+    CAMERA_IP = '192.168.1.163'
+    camera_url = f"rtsp://admin:{CAMERA_PASS}@{CAMERA_IP}:554/h264Preview_01_main"
     cap = cv2.VideoCapture(camera_url)
     if not cap.isOpened():
         print(f"Cannot open camera {camera_url}")
         return
 
     # Try to capture at a higher resolution to help with far away codes
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 720)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 100)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 100)
 
     detector = cv2.QRCodeDetector()
     barcode_detector = cv2.barcode_BarcodeDetector() # type: ignore
