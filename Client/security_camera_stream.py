@@ -134,7 +134,8 @@ def main() -> None:
     )
     CAMERA_PASS = 'titalovA'
     CAMERA_IP = '192.168.1.163'
-    camera_url = f"rtsp://admin:{CAMERA_PASS}@{CAMERA_IP}:554/h264Preview_01_main"
+    # camera_url = f"rtsp://admin:{CAMERA_PASS}@{CAMERA_IP}:554/h264Preview_01_main"
+    camera_url = 0
     cap = cv2.VideoCapture(camera_url)
     if not cap.isOpened():
         print(f"Cannot open camera {camera_url}")
