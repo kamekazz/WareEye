@@ -183,7 +183,7 @@ def main() -> None:
                     barcodes = pyzbar.decode(gray)
                     if not barcodes and yolo_model is not None:
                         results = yolo_model(frame, verbose=False)
-                        for bbox in results.boxes.xyxy.tolist():
+                        for bbox in results.boxes.xyxy.tolist(): # type: ignore
                             x1, y1, x2, y2 = map(int, bbox)
                             roi = gray[y1:y2, x1:x2]
                             detected = pyzbar.decode(roi)
