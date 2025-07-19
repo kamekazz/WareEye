@@ -1,0 +1,39 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Scans</h1>
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Camera Name</th>
+      <th>Area</th>
+      <th>Camera Type</th>
+      <th>Client IP</th>
+      <th>Camera URL</th>
+      <th>Barcode</th>
+      <th>Timestamp</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for scan in scans %}
+    <tr>
+      <td>{{ scan.id }}</td>
+      <td>{{ scan.camera_name }}</td>
+      <td>{{ scan.area }}</td>
+      <td>{{ scan.camera_type }}</td>
+      <td>{{ scan.client_ip }}</td>
+      <td>{{ scan.camera_url }}</td>
+      <td>{{ scan.barcode }}</td>
+      <td>{{ scan.timestamp }}</td>
+      <td>
+        <a href="{{ url_for('scan.edit_scan', scan_id=scan.id) }}" class="btn btn-sm btn-primary">Edit</a>
+        <form method="post" action="{{ url_for('scan.delete_scan', scan_id=scan.id) }}" style="display:inline;" onsubmit="return confirm('Delete this scan?');">
+          <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
