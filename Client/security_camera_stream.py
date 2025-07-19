@@ -96,14 +96,24 @@ def main() -> None:
 
     args = parser.parse_args()
 
-    # Prompt for camera metadata before starting the stream
-    camera_name = input("Camera Name: ")
-    camera_area = input("Camera Area: ")
-    camera_type = input("Camera Type: ")
-    server_IP = input("Server IP: ")
-    port = input("Port: ")
-
+    # Load previous camera metadata if available and prompt for updates
     info_path = os.path.join(os.path.dirname(__file__), "camera_info.txt")
+    prev_info = parse_camera_info(info_path)
+
+    camera_name = input(
+        f"Camera Name [{prev_info.get('Camera Name', '')}]: "
+    ) or prev_info.get("Camera Name", "")
+    camera_area = input(
+        f"Camera Area [{prev_info.get('Camera Area', '')}]: "
+    ) or prev_info.get("Camera Area", "")
+    camera_type = input(
+        f"Camera Type [{prev_info.get('Camera Type', '')}]: "
+    ) or prev_info.get("Camera Type", "")
+    server_IP = input(
+        f"Server IP [{prev_info.get('Server IP', '')}]: "
+    ) or prev_info.get("Server IP", "")
+    port = input(f"Port [{prev_info.get('Port', '')}]: ") or prev_info.get("Port", "")
+
     with open(info_path, "w", encoding="utf-8") as f:
         f.write(f"Camera Name: {camera_name}\n")
         f.write(f"Camera Area: {camera_area}\n")
