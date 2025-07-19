@@ -53,7 +53,7 @@ def send_barcode(data: str, info: Dict[str, str], last: Dict[str, str]) -> None:
         "camera_area": info.get("Camera Area", ""),
         "camera_type": info.get("Camera Type", ""),
     }
-    url = f"http://{info.get('Server IP', 'localhost')}:{info.get('Port', '5000')}"
+    url = f"http://{info.get('Server IP', 'localhost')}:{info.get('Port', '5000')}/scan"
 
     try:
         requests.post(url, json=payload, timeout=2)
