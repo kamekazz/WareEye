@@ -50,7 +50,7 @@ def send_barcode(data: str, info: Dict[str, str], last: Dict[str, str]) -> None:
     if data == last.get("barcode"):
         return
 
-    if now - last.get("time", 0) < 1:
+    if now - last.get("time", 0) < 1: # type: ignore
         return
 
     payload = {
@@ -67,7 +67,7 @@ def send_barcode(data: str, info: Dict[str, str], last: Dict[str, str]) -> None:
         print(f"Failed to send barcode data: {exc}")
 
     last["barcode"] = data
-    last["time"] = now
+    last["time"] = now # type: ignore
 
 
 def main() -> None:
