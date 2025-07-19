@@ -30,20 +30,20 @@ def ingest_scan() -> tuple:
         else:
             timestamp = datetime.utcnow()
         scan = Scan(
-            camera_name=data["camera_name"],
-            area=data["area"],
-            camera_type=data["camera_type"],
-            client_ip=data["client_ip"],
-            camera_url=data["camera_url"],
-            barcode=data["barcode"],
-            timestamp=timestamp,
+            camera_name=data["camera_name"], # type: ignore
+            area=data["area"], # type: ignore
+            camera_type=data["camera_type"], # type: ignore
+            client_ip=data["client_ip"], # type: ignore
+            camera_url=data["camera_url"], # type: ignore
+            barcode=data["barcode"], # type: ignore
+            timestamp=timestamp, # type: ignore
         )
     except Exception as exc:  # pragma: no cover - input errors
         return jsonify({"error": f"Invalid payload: {exc}"}), 400
 
     db.session.add(scan)
     db.session.commit()
-    return jsonify({"status": "success", "id": scan.id})
+    return jsonify({"status": "success", "id": scan.id}) # type: ignore
 
 
 @bp.route("/scans")
