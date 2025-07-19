@@ -2,7 +2,11 @@
 import os
 import argparse
 import urllib.request
+import time
+from typing import Dict
+
 import cv2
+import requests
 from pyzbar import pyzbar
 try:
     from ultralytics import YOLO
@@ -21,6 +25,42 @@ def ensure_wechat_models(det_proto: str, det_model: str, sr_proto: str, sr_model
                 urllib.request.urlretrieve(url, path)
             except Exception as exc:  # pragma: no cover - network issues
                 print(f"Failed to download {url}: {exc}")
+
+
+def parse_camera_info(info_path: str) -> Dict[str, str]:
+    """Parse camera metadata from the info file."""
+    info: Dict[str, str] = {}
+    if os.path.exists(info_path):
+        with open(info_path, "r", encoding="utf-8") as f:
+            for line in f:
+                if ":" in line:
+                    key, value = line.strip().split(":", 1)
+                    info[key.strip()] = value.strip()
+    return info
+
+
+def send_barcode(data: str, info: Dict[str, str], last: Dict[str, str]) -> None:
+    """Send scanned barcode data to the server."""
+    if not data:
+        return
+
+    if data == last.get("barcode"):
+        time.sleep(1)
+
+    payload = {
+        "barcode": data,
+        "camera_name": info.get("Camera Name", ""),
+        "camera_area": info.get("Camera Area", ""),
+        "camera_type": info.get("Camera Type", ""),
+    }
+    url = f"http://{info.get('Server IP', 'localhost')}:{info.get('Port', '5000')}"
+
+    try:
+        requests.post(url, json=payload, timeout=2)
+    except Exception as exc:  # pragma: no cover - network or server errors
+        print(f"Failed to send barcode data: {exc}")
+
+    last["barcode"] = data
 
 
 def main() -> None:
@@ -72,6 +112,9 @@ def main() -> None:
         f.write(f"Port: {port}\n")
 
     print(f"Camera info saved to {info_path}")
+
+    camera_info = parse_camera_info(info_path)
+    last_scanned: Dict[str, str] = {}
 
     ensure_wechat_models(
         args.wechat_det_prototxt,
@@ -146,6 +189,7 @@ def main() -> None:
                         (0, 255, 0),
                         2,
                     )
+                    send_barcode(text, camera_info, last_scanned)
         else:
             data, bbox, _ = detector.detectAndDecode(gray)
             if bbox is not None and len(bbox):
@@ -161,6 +205,7 @@ def main() -> None:
                         (0, 255, 0),
                         2,
                     )
+                    send_barcode(data, camera_info, last_scanned)
             else:
                 texts, w_points = [], []
                 if wechat_detector is not None:
@@ -183,6 +228,7 @@ def main() -> None:
                                 (0, 255, 0),
                                 2,
                             )
+                            send_barcode(text, camera_info, last_scanned)
                 else:
                     barcodes = pyzbar.decode(gray)
                     if not barcodes and yolo_model is not None:
@@ -211,6 +257,7 @@ def main() -> None:
                                         (0, 255, 0),
                                         2,
                                     )
+                                    send_barcode(barcode_data, camera_info, last_scanned)
                             else:
                                 cv2.rectangle(display_frame, (x1, y1), (x2, y2), (0, 255, 255), 2)
                     else:
@@ -227,6 +274,7 @@ def main() -> None:
                                 (0, 255, 0),
                                 2,
                             )
+                            send_barcode(barcode_data, camera_info, last_scanned)
 
         cv2.imshow("Security Camera Stream", display_frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
