@@ -1,12 +1,26 @@
 
 import os
 import argparse
+import urllib.request
 import cv2
 from pyzbar import pyzbar
 try:
     from ultralytics import YOLO
 except ImportError:  # pragma: no cover - optional dependency
     YOLO = None  # type: ignore
+
+
+def ensure_wechat_models(det_proto: str, det_model: str, sr_proto: str, sr_model: str) -> None:
+    """Download WeChatQRCode models if they don't exist."""
+    base_url = "https://raw.githubusercontent.com/WeChatCV/opencv_3rdparty/wechat_qrcode/"
+    for path in [det_proto, det_model, sr_proto, sr_model]:
+        if not os.path.exists(path):
+            url = base_url + os.path.basename(path)
+            try:
+                print(f"Downloading {url} ...")
+                urllib.request.urlretrieve(url, path)
+            except Exception as exc:  # pragma: no cover - network issues
+                print(f"Failed to download {url}: {exc}")
 
 
 def main() -> None:
@@ -19,7 +33,34 @@ def main() -> None:
         default=os.getenv("YOLO_MODEL_PATH", "barcode_yolo.pt"),
         help="Path to the YOLO model for barcode detection",
     )
+    parser.add_argument(
+        "--wechat-det-prototxt",
+        default=os.getenv("WECHAT_DET_PROTOTXT", "detect.prototxt"),
+        help="Path to WeChat QRCode detection prototxt file",
+    )
+    parser.add_argument(
+        "--wechat-det-model",
+        default=os.getenv("WECHAT_DET_MODEL", "detect.caffemodel"),
+        help="Path to WeChat QRCode detection model file",
+    )
+    parser.add_argument(
+        "--wechat-sr-prototxt",
+        default=os.getenv("WECHAT_SR_PROTOTXT", "sr.prototxt"),
+        help="Path to WeChat QRCode super resolution prototxt file",
+    )
+    parser.add_argument(
+        "--wechat-sr-model",
+        default=os.getenv("WECHAT_SR_MODEL", "sr.caffemodel"),
+        help="Path to WeChat QRCode super resolution model file",
+    )
     args = parser.parse_args()
+
+    ensure_wechat_models(
+        args.wechat_det_prototxt,
+        args.wechat_det_model,
+        args.wechat_sr_prototxt,
+        args.wechat_sr_model,
+    )
 
     camera_url = 0
     cap = cv2.VideoCapture(camera_url)
@@ -33,6 +74,18 @@ def main() -> None:
 
     detector = cv2.QRCodeDetector()
     barcode_detector = cv2.barcode_BarcodeDetector() # type: ignore
+
+    wechat_detector = None
+    if hasattr(cv2, "wechat_qrcode"):
+        try:
+            wechat_detector = cv2.wechat_qrcode.WeChatQRCode(
+                args.wechat_det_prototxt,
+                args.wechat_det_model,
+                args.wechat_sr_prototxt,
+                args.wechat_sr_model,
+            )
+        except Exception as exc:  # pragma: no cover - optional dependency
+            print(f"Failed to load WeChatQRCode models: {exc}")
 
     # Load YOLO model for barcode detection if available
     yolo_model = None
@@ -90,49 +143,71 @@ def main() -> None:
                         2,
                     )
             else:
-                barcodes = pyzbar.decode(gray)
-                if not barcodes and yolo_model is not None:
-                    results = yolo_model(frame, verbose=False)
-                    for bbox in results.boxes.xyxy.tolist():
-                        x1, y1, x2, y2 = map(int, bbox)
-                        roi = gray[y1:y2, x1:x2]
-                        detected = pyzbar.decode(roi)
-                        if detected:
-                            for bc in detected:
-                                x, y, w, h = bc.rect
-                                cv2.rectangle(
-                                    display_frame,
-                                    (x1 + x, y1 + y),
-                                    (x1 + x + w, y1 + y + h),
-                                    (0, 255, 0),
-                                    2,
-                                )
-                                barcode_data = bc.data.decode("utf-8")
-                                cv2.putText(
-                                    display_frame,
-                                    barcode_data,
-                                    (x1 + x, y1 + y - 10),
-                                    cv2.FONT_HERSHEY_SIMPLEX,
-                                    0.6,
-                                    (0, 255, 0),
-                                    2,
-                                )
-                        else:
-                            cv2.rectangle(display_frame, (x1, y1), (x2, y2), (0, 255, 255), 2)
+                texts, w_points = [], []
+                if wechat_detector is not None:
+                    try:
+                        texts, w_points = wechat_detector.detectAndDecode(gray)
+                    except Exception as exc:  # pragma: no cover - runtime issues
+                        print(f"WeChatQRCode detection failed: {exc}")
+
+                if w_points:
+                    for text, pts in zip(texts, w_points):
+                        pts = pts.astype(int).reshape(-1, 2)
+                        cv2.polylines(display_frame, [pts], True, (0, 255, 0), 2)
+                        if text:
+                            cv2.putText(
+                                display_frame,
+                                text,
+                                tuple(pts[0]),
+                                cv2.FONT_HERSHEY_SIMPLEX,
+                                0.6,
+                                (0, 255, 0),
+                                2,
+                            )
                 else:
-                    for barcode in barcodes:
-                        x, y, w, h = barcode.rect
-                        cv2.rectangle(display_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                        barcode_data = barcode.data.decode("utf-8")
-                        cv2.putText(
-                            display_frame,
-                            barcode_data,
-                            (x, y - 10),
-                            cv2.FONT_HERSHEY_SIMPLEX,
-                            0.6,
-                            (0, 255, 0),
-                            2,
-                        )
+                    barcodes = pyzbar.decode(gray)
+                    if not barcodes and yolo_model is not None:
+                        results = yolo_model(frame, verbose=False)
+                        for bbox in results.boxes.xyxy.tolist():
+                            x1, y1, x2, y2 = map(int, bbox)
+                            roi = gray[y1:y2, x1:x2]
+                            detected = pyzbar.decode(roi)
+                            if detected:
+                                for bc in detected:
+                                    x, y, w, h = bc.rect
+                                    cv2.rectangle(
+                                        display_frame,
+                                        (x1 + x, y1 + y),
+                                        (x1 + x + w, y1 + y + h),
+                                        (0, 255, 0),
+                                        2,
+                                    )
+                                    barcode_data = bc.data.decode("utf-8")
+                                    cv2.putText(
+                                        display_frame,
+                                        barcode_data,
+                                        (x1 + x, y1 + y - 10),
+                                        cv2.FONT_HERSHEY_SIMPLEX,
+                                        0.6,
+                                        (0, 255, 0),
+                                        2,
+                                    )
+                            else:
+                                cv2.rectangle(display_frame, (x1, y1), (x2, y2), (0, 255, 255), 2)
+                    else:
+                        for barcode in barcodes:
+                            x, y, w, h = barcode.rect
+                            cv2.rectangle(display_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                            barcode_data = barcode.data.decode("utf-8")
+                            cv2.putText(
+                                display_frame,
+                                barcode_data,
+                                (x, y - 10),
+                                cv2.FONT_HERSHEY_SIMPLEX,
+                                0.6,
+                                (0, 255, 0),
+                                2,
+                            )
 
         cv2.imshow("Security Camera Stream", display_frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
