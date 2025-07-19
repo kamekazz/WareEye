@@ -1,3 +1,3 @@
-opencv-contrib-python
-pyzbar
-ultralytics
+opencv-contrib-python==4.12.0.88
+pyzbar==0.1.9
+ultralytics==8.3.168
