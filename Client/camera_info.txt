@@ -1,3 +1,5 @@
-Camera Name: bb
-Camera Area: zone b
-Camera Type: faffdsa
+Camera Name: name
+Camera Area: area
+Camera Type: type
+Server IP: aasaaa
+Port: ssss

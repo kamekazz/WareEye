@@ -60,12 +60,16 @@ def main() -> None:
     camera_name = input("Camera Name: ")
     camera_area = input("Camera Area: ")
     camera_type = input("Camera Type: ")
+    server_IP = input("Server IP: ")
+    port = input("Port: ")
 
     info_path = os.path.join(os.path.dirname(__file__), "camera_info.txt")
     with open(info_path, "w", encoding="utf-8") as f:
         f.write(f"Camera Name: {camera_name}\n")
         f.write(f"Camera Area: {camera_area}\n")
         f.write(f"Camera Type: {camera_type}\n")
+        f.write(f"Server IP: {server_IP}\n")
+        f.write(f"Port: {port}\n")
 
     print(f"Camera info saved to {info_path}")
 
