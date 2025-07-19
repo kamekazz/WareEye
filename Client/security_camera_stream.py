@@ -1,6 +1,10 @@
 
 import cv2
 from pyzbar import pyzbar
+try:
+    from ultralytics import YOLO
+except ImportError:  # pragma: no cover - optional dependency
+    YOLO = None  # type: ignore
 
 
 def main() -> None:
@@ -17,6 +21,14 @@ def main() -> None:
 
     detector = cv2.QRCodeDetector()
     barcode_detector = cv2.barcode_BarcodeDetector() # type: ignore
+
+    # Load YOLO model for barcode detection if available
+    yolo_model = None
+    if YOLO is not None:
+        try:
+            yolo_model = YOLO("barcode_yolo.pt")
+        except Exception as exc:  # pragma: no cover - model loading is optional
+            print(f"Failed to load YOLO model: {exc}")
 
     while True:
         ret, frame = cap.read()
@@ -61,19 +73,48 @@ def main() -> None:
                     )
             else:
                 barcodes = pyzbar.decode(gray)
-                for barcode in barcodes:
-                    x, y, w, h = barcode.rect
-                    cv2.rectangle(display_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
-                    barcode_data = barcode.data.decode("utf-8")
-                    cv2.putText(
-                        display_frame,
-                        barcode_data,
-                        (x, y - 10),
-                        cv2.FONT_HERSHEY_SIMPLEX,
-                        0.6,
-                        (0, 255, 0),
-                        2,
-                    )
+                if not barcodes and yolo_model is not None:
+                    results = yolo_model(frame, verbose=False)
+                    for bbox in results.boxes.xyxy.tolist():
+                        x1, y1, x2, y2 = map(int, bbox)
+                        roi = gray[y1:y2, x1:x2]
+                        detected = pyzbar.decode(roi)
+                        if detected:
+                            for bc in detected:
+                                x, y, w, h = bc.rect
+                                cv2.rectangle(
+                                    display_frame,
+                                    (x1 + x, y1 + y),
+                                    (x1 + x + w, y1 + y + h),
+                                    (0, 255, 0),
+                                    2,
+                                )
+                                barcode_data = bc.data.decode("utf-8")
+                                cv2.putText(
+                                    display_frame,
+                                    barcode_data,
+                                    (x1 + x, y1 + y - 10),
+                                    cv2.FONT_HERSHEY_SIMPLEX,
+                                    0.6,
+                                    (0, 255, 0),
+                                    2,
+                                )
+                        else:
+                            cv2.rectangle(display_frame, (x1, y1), (x2, y2), (0, 255, 255), 2)
+                else:
+                    for barcode in barcodes:
+                        x, y, w, h = barcode.rect
+                        cv2.rectangle(display_frame, (x, y), (x + w, y + h), (0, 255, 0), 2)
+                        barcode_data = barcode.data.decode("utf-8")
+                        cv2.putText(
+                            display_frame,
+                            barcode_data,
+                            (x, y - 10),
+                            cv2.FONT_HERSHEY_SIMPLEX,
+                            0.6,
+                            (0, 255, 0),
+                            2,
+                        )
 
         cv2.imshow("Security Camera Stream", display_frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
