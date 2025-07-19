@@ -1,0 +1,36 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Edit Scan {{ scan.id }}</h1>
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Camera Name</label>
+    <input type="text" name="camera_name" class="form-control" value="{{ scan.camera_name }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Area</label>
+    <input type="text" name="area" class="form-control" value="{{ scan.area }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Camera Type</label>
+    <input type="text" name="camera_type" class="form-control" value="{{ scan.camera_type }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Client IP</label>
+    <input type="text" name="client_ip" class="form-control" value="{{ scan.client_ip }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Camera URL</label>
+    <input type="text" name="camera_url" class="form-control" value="{{ scan.camera_url }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Barcode</label>
+    <input type="text" name="barcode" class="form-control" value="{{ scan.barcode }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Timestamp (ISO 8601)</label>
+    <input type="text" name="timestamp" class="form-control" value="{{ scan.timestamp.isoformat() }}" required>
+  </div>
+  <button type="submit" class="btn btn-primary">Save Changes</button>
+  <a href="{{ url_for('scan.list_scans') }}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}
