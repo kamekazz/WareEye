@@ -39,18 +39,21 @@ def parse_camera_info(info_path: str) -> Dict[str, str]:
     return info
 
 
-def send_barcode(data: str, info: Dict[str, str], last: Dict[str, str]) -> None:
-    """Send scanned barcode data to the server."""
+def send_barcode(data: str, info: Dict[str, str], last: Dict[str, float]) -> None:
+    """Send scanned barcode data to the server.
+
+    A barcode will only be posted if at least two seconds have passed since the
+    last time that same barcode was sent. This prevents repeatedly hitting the
+    server when the same code is scanned in rapid succession.
+    """
     if not data:
         return
 
     now = time.time()
 
-    # Skip sending if this barcode was already sent or if we recently sent
-    if data == last.get("barcode"):
-        return
-
-    if now - last.get("time", 0) < 1: # type: ignore
+    # Only send if more than two seconds have passed since this barcode was
+    # last posted.
+    if now - last.get(data, 0) < 2:
         return
 
     payload = {
@@ -68,8 +71,8 @@ def send_barcode(data: str, info: Dict[str, str], last: Dict[str, str]) -> None:
     except Exception as exc:  # pragma: no cover - network or server errors
         print(f"Failed to send barcode data: {exc}")
 
-    last["barcode"] = data
-    last["time"] = now # type: ignore
+    # Record the time this barcode was sent
+    last[data] = now
 
 
 def main() -> None:
@@ -141,7 +144,8 @@ def main() -> None:
     print(f"Camera info saved to {info_path}")
 
     camera_info = parse_camera_info(info_path)
-    last_scanned: Dict[str, str] = {}
+    # Tracks the last time each barcode was posted
+    last_scanned: Dict[str, float] = {}
 
     ensure_wechat_models(
         args.wechat_det_prototxt,
