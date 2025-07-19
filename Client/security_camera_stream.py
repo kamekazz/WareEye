@@ -56,10 +56,12 @@ def send_barcode(data: str, info: Dict[str, str], last: Dict[str, str]) -> None:
     payload = {
         "barcode": data,
         "camera_name": info.get("Camera Name", ""),
-        "camera_area": info.get("Camera Area", ""),
+        "area": info.get("Camera Area", ""),
         "camera_type": info.get("Camera Type", ""),
+        "client_ip": info.get("Client IP", ""),
+        "camera_url": info.get("Camera URL", ""),
     }
-    url = f"http://{info.get('Server IP', 'localhost')}:{info.get('Port', '5000')}/scan"
+    url = f"http://{info.get('Server IP', 'localhost')}:{info.get('Port', '5000')}/api/scan"
 
     try:
         requests.post(url, json=payload, timeout=2)
@@ -120,6 +122,12 @@ def main() -> None:
         f"Server IP [{prev_info.get('Server IP', '')}]: "
     ) or prev_info.get("Server IP", "")
     port = input(f"Port [{prev_info.get('Port', '')}]: ") or prev_info.get("Port", "")
+    client_ip = input(
+        f"Client IP [{prev_info.get('Client IP', '')}]: "
+    ) or prev_info.get("Client IP", "")
+    camera_url_input = input(
+        f"Camera URL [{prev_info.get('Camera URL', '')}]: "
+    ) or prev_info.get("Camera URL", "")
 
     with open(info_path, "w", encoding="utf-8") as f:
         f.write(f"Camera Name: {camera_name}\n")
@@ -127,6 +135,8 @@ def main() -> None:
         f.write(f"Camera Type: {camera_type}\n")
         f.write(f"Server IP: {server_IP}\n")
         f.write(f"Port: {port}\n")
+        f.write(f"Client IP: {client_ip}\n")
+        f.write(f"Camera URL: {camera_url_input}\n")
 
     print(f"Camera info saved to {info_path}")
 
@@ -139,11 +149,9 @@ def main() -> None:
         args.wechat_sr_prototxt,
         args.wechat_sr_model,
     )
-    CAMERA_PASS = 'titalovA'
-    CAMERA_IP = '192.168.1.163'
-    # camera_url = f"rtsp://admin:{CAMERA_PASS}@{CAMERA_IP}:554/h264Preview_01_main"
-    camera_url = 0
-    cap = cv2.VideoCapture(camera_url)
+    camera_url = camera_info.get("Camera URL", "0")
+    cam_source = int(camera_url) if camera_url.isdigit() else camera_url
+    cap = cv2.VideoCapture(cam_source)
     if not cap.isOpened():
         print(f"Cannot open camera {camera_url}")
         return
