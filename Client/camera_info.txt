@@ -3,5 +3,5 @@ Camera Area: zone
 Camera Type: usb
 Server IP: 127.0.0.1
 Port: 5000
-ID:
-Camera URL: 
+Client IP:
+Camera URL:
