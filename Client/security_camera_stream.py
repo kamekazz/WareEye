@@ -1,4 +1,6 @@
 
+import os
+import argparse
 import cv2
 from pyzbar import pyzbar
 try:
@@ -9,6 +11,16 @@ except ImportError:  # pragma: no cover - optional dependency
 
 def main() -> None:
     """Start the webcam stream and scan for barcodes or QR codes."""
+    parser = argparse.ArgumentParser(
+        description="Start the webcam stream and scan for barcodes or QR codes."
+    )
+    parser.add_argument(
+        "--model-path",
+        default=os.getenv("YOLO_MODEL_PATH", "barcode_yolo.pt"),
+        help="Path to the YOLO model for barcode detection",
+    )
+    args = parser.parse_args()
+
     camera_url = 0
     cap = cv2.VideoCapture(camera_url)
     if not cap.isOpened():
@@ -25,10 +37,16 @@ def main() -> None:
     # Load YOLO model for barcode detection if available
     yolo_model = None
     if YOLO is not None:
-        try:
-            yolo_model = YOLO("barcode_yolo.pt")
-        except Exception as exc:  # pragma: no cover - model loading is optional
-            print(f"Failed to load YOLO model: {exc}")
+        model_path = args.model_path
+        if os.path.exists(model_path):
+            try:
+                yolo_model = YOLO(model_path)
+            except Exception as exc:  # pragma: no cover - model loading is optional
+                print(f"Failed to load YOLO model from {model_path}: {exc}")
+        else:
+            print(
+                f"YOLO model file '{model_path}' not found. Barcode detection with YOLO disabled."
+            )
 
     while True:
         ret, frame = cap.read()
