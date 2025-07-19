@@ -1,5 +1,5 @@
-Camera Name: name
-Camera Area: area
-Camera Type: type
-Server IP: aasaaa
-Port: ssss
+Camera Name: web
+Camera Area: zone
+Camera Type: usb
+Server IP: 127.0.0.1
+Port: 5000

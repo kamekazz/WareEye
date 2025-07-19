@@ -142,8 +142,8 @@ def main() -> None:
         return
 
     # Try to capture at a higher resolution to help with far away codes
-    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 100)
-    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 100)
+    cap.set(cv2.CAP_PROP_FRAME_WIDTH, 1280)
+    cap.set(cv2.CAP_PROP_FRAME_HEIGHT, 1080)
 
     detector = cv2.QRCodeDetector()
     barcode_detector = cv2.barcode_BarcodeDetector() # type: ignore
