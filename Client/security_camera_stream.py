@@ -53,7 +53,21 @@ def main() -> None:
         default=os.getenv("WECHAT_SR_MODEL", "sr.caffemodel"),
         help="Path to WeChat QRCode super resolution model file",
     )
+
     args = parser.parse_args()
+
+    # Prompt for camera metadata before starting the stream
+    camera_name = input("Camera Name: ")
+    camera_area = input("Camera Area: ")
+    camera_type = input("Camera Type: ")
+
+    info_path = os.path.join(os.path.dirname(__file__), "camera_info.txt")
+    with open(info_path, "w", encoding="utf-8") as f:
+        f.write(f"Camera Name: {camera_name}\n")
+        f.write(f"Camera Area: {camera_area}\n")
+        f.write(f"Camera Type: {camera_type}\n")
+
+    print(f"Camera info saved to {info_path}")
 
     ensure_wechat_models(
         args.wechat_det_prototxt,
