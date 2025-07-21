@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Destination Codes</h1>
+<form method="post" class="row g-3 mb-4">
+  <div class="col-md-3">
+    <input type="text" name="code" class="form-control" placeholder="Code" required>
+  </div>
+  <div class="col-md-5">
+    <input type="text" name="name" class="form-control" placeholder="Name" required>
+  </div>
+  <div class="col-md-2 d-grid">
+    <button type="submit" class="btn btn-primary">Add Code</button>
+  </div>
+</form>
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Code</th>
+      <th>Name</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for c in codes %}
+    <tr>
+      <td>{{ c.id }}</td>
+      <td>{{ c.code }}</td>
+      <td>{{ c.name }}</td>
+      <td>
+        <a href="{{ url_for('scan.edit_destination_code', code_id=c.id) }}" class="btn btn-sm btn-primary">Edit</a>
+        <form method="post" action="{{ url_for('scan.delete_destination_code', code_id=c.id) }}" style="display:inline;" onsubmit="return confirm('Delete this code?');">
+          <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="4" class="text-center">No destination codes.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

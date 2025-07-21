@@ -1,0 +1,16 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Edit Destination Code {{ code.id }}</h1>
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Code</label>
+    <input type="text" name="code" class="form-control" value="{{ code.code }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Name</label>
+    <input type="text" name="name" class="form-control" value="{{ code.name }}" required>
+  </div>
+  <button type="submit" class="btn btn-primary">Save Changes</button>
+  <a href="{{ url_for('scan.list_destination_codes') }}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

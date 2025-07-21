@@ -17,3 +17,16 @@ class Scan(db.Model):
 
     def __repr__(self) -> str:  # pragma: no cover - representation only
         return f"<Scan {self.id} {self.barcode}>"
+
+
+class DestinationCode(db.Model):
+    """Mapping of 3-letter codes to carrier names."""
+
+    __tablename__ = "destination_codes"
+
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(8), nullable=False, unique=True)
+    name = db.Column(db.String(64), nullable=False)
+
+    def __repr__(self) -> str:  # pragma: no cover - representation only
+        return f"<DestinationCode {self.id} {self.code}>"
