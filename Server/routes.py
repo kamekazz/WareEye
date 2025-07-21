@@ -9,7 +9,7 @@ from flask import (
     flash,
 )
 
-from models import db, Scan
+from models import db, Scan, DestinationCode
 
 bp = Blueprint("scan", __name__)
 
@@ -108,3 +108,54 @@ def delete_scan(scan_id: int):
     db.session.commit()
     flash("Scan deleted", "success")
     return redirect(url_for("scan.list_scans"))
+
+
+@bp.route("/destination-codes", methods=["GET", "POST"])
+def list_destination_codes() -> str:
+    """Show all destination codes and handle creation."""
+    if request.method == "POST":
+        code = request.form.get("code", "").strip()
+        name = request.form.get("name", "").strip()
+        if not code or not name:
+            flash("Code and Name are required", "danger")
+        elif DestinationCode.query.filter_by(code=code).first():
+            flash("Code already exists", "danger")
+        else:
+            db.session.add(DestinationCode(code=code, name=name))
+            db.session.commit()
+            flash("Destination code added", "success")
+            return redirect(url_for("scan.list_destination_codes"))
+    codes = DestinationCode.query.order_by(DestinationCode.code).all()
+    return render_template("destination_codes.html", codes=codes)
+
+
+@bp.route("/destination-codes/<int:code_id>/edit", methods=["GET", "POST"])
+def edit_destination_code(code_id: int):
+    """Edit a destination code."""
+    code_obj = DestinationCode.query.get_or_404(code_id)
+    if request.method == "POST":
+        code = request.form.get("code", "").strip()
+        name = request.form.get("name", "").strip()
+        if not code or not name:
+            flash("Code and Name are required", "danger")
+        elif DestinationCode.query.filter(
+            DestinationCode.code == code, DestinationCode.id != code_id
+        ).first():
+            flash("Code already exists", "danger")
+        else:
+            code_obj.code = code
+            code_obj.name = name
+            db.session.commit()
+            flash("Destination code updated", "success")
+            return redirect(url_for("scan.list_destination_codes"))
+    return render_template("destination_code_edit.html", code=code_obj)
+
+
+@bp.route("/destination-codes/<int:code_id>/delete", methods=["POST"])
+def delete_destination_code(code_id: int):
+    """Delete a destination code."""
+    code_obj = DestinationCode.query.get_or_404(code_id)
+    db.session.delete(code_obj)
+    db.session.commit()
+    flash("Destination code deleted", "success")
+    return redirect(url_for("scan.list_destination_codes"))
