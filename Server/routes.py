@@ -48,9 +48,33 @@ def ingest_scan() -> tuple:
 
 @bp.route("/scans")
 def list_scans() -> str:
-    """Render a table with all scans."""
-    scans = Scan.query.order_by(Scan.timestamp.desc()).all()
-    return render_template("scans.html", scans=scans)
+    """Render a table of scans with optional filtering and pagination."""
+    barcode = request.args.get("barcode")
+    area = request.args.get("area")
+    camera = request.args.get("camera_name")
+    start_date = request.args.get("start_date")
+    end_date = request.args.get("end_date")
+    page = int(request.args.get("page", 1))
+
+    q = Scan.query
+    if barcode:
+        q = q.filter(Scan.barcode.ilike(f"%{barcode}%"))
+    if area:
+        q = q.filter(Scan.area.ilike(f"%{area}%"))
+    if camera:
+        q = q.filter(Scan.camera_name.ilike(f"%{camera}%"))
+    if start_date:
+        q = q.filter(Scan.timestamp >= start_date)
+    if end_date:
+        q = q.filter(Scan.timestamp <= end_date)
+
+    scans = (
+        q.order_by(Scan.timestamp.desc()).paginate(page=page, per_page=50)
+    )
+
+    args = request.args.to_dict()
+    args.pop("page", None)
+    return render_template("scans.html", scans=scans, args=args)
 
 
 @bp.route("/scans/<int:scan_id>/edit", methods=["GET", "POST"])
