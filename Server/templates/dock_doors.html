@@ -1,0 +1,53 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Dock Doors</h1>
+<form method="post" class="row g-3 mb-4">
+  <div class="col-md-3">
+    <input type="text" name="name" class="form-control" placeholder="Name" required>
+  </div>
+  <div class="col-md-4">
+    <select name="destination_code_id" class="form-select" required>
+      <option value="" disabled selected>Select Destination</option>
+      {% for code in codes %}
+      <option value="{{ code.id }}">{{ code.code }} - {{ code.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2 d-grid">
+    <button type="submit" class="btn btn-primary">Add Door</button>
+  </div>
+</form>
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Name</th>
+      <th>Destination</th>
+      <th>Created At</th>
+      <th>Updated At</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for door in doors %}
+    <tr>
+      <td>{{ door.id }}</td>
+      <td>{{ door.name }}</td>
+      <td>{{ door.destination_code.code }}</td>
+      <td>{{ door.created_at }}</td>
+      <td>{{ door.updated_at }}</td>
+      <td>
+        <a href="{{ url_for('scan.edit_dock_door', door_id=door.id) }}" class="btn btn-sm btn-primary">Edit</a>
+        <form method="post" action="{{ url_for('scan.delete_dock_door', door_id=door.id) }}" style="display:inline;" onsubmit="return confirm('Delete this door?');">
+          <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="6" class="text-center">No dock doors.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

@@ -9,7 +9,7 @@ from flask import (
     flash,
 )
 
-from models import db, Scan, DestinationCode
+from models import db, Scan, DestinationCode, DockDoor
 
 bp = Blueprint("scan", __name__)
 
@@ -159,3 +159,58 @@ def delete_destination_code(code_id: int):
     db.session.commit()
     flash("Destination code deleted", "success")
     return redirect(url_for("scan.list_destination_codes"))
+
+
+@bp.route("/dock-doors", methods=["GET", "POST"])
+def list_dock_doors() -> str:
+    """List dock doors and handle creation."""
+    codes = DestinationCode.query.order_by(DestinationCode.code).all()
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        destination_id = request.form.get("destination_code_id")
+        if not name or not destination_id:
+            flash("Name and Destination are required", "danger")
+        elif DockDoor.query.filter_by(name=name).first():
+            flash("Name already exists", "danger")
+        else:
+            dock = DockDoor(name=name, destination_code_id=int(destination_id))
+            db.session.add(dock)
+            db.session.commit()
+            flash("Dock door added", "success")
+            return redirect(url_for("scan.list_dock_doors"))
+
+    doors = DockDoor.query.order_by(DockDoor.created_at.desc()).all()
+    return render_template("dock_doors.html", doors=doors, codes=codes)
+
+
+@bp.route("/dock-doors/<int:door_id>/edit", methods=["GET", "POST"])
+def edit_dock_door(door_id: int):
+    """Edit a dock door."""
+    door = DockDoor.query.get_or_404(door_id)
+    codes = DestinationCode.query.order_by(DestinationCode.code).all()
+    if request.method == "POST":
+        name = request.form.get("name", "").strip()
+        destination_id = request.form.get("destination_code_id")
+        if not name or not destination_id:
+            flash("Name and Destination are required", "danger")
+        elif DockDoor.query.filter(DockDoor.name == name, DockDoor.id != door_id).first():
+            flash("Name already exists", "danger")
+        else:
+            door.name = name
+            door.destination_code_id = int(destination_id)
+            door.is_active = bool(request.form.get("is_active"))
+            door.description = request.form.get("description") or None
+            db.session.commit()
+            flash("Dock door updated", "success")
+            return redirect(url_for("scan.list_dock_doors"))
+    return render_template("dock_door_edit.html", door=door, codes=codes)
+
+
+@bp.route("/dock-doors/<int:door_id>/delete", methods=["POST"])
+def delete_dock_door(door_id: int):
+    """Delete a dock door."""
+    door = DockDoor.query.get_or_404(door_id)
+    db.session.delete(door)
+    db.session.commit()
+    flash("Dock door deleted", "success")
+    return redirect(url_for("scan.list_dock_doors"))
