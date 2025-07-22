@@ -30,3 +30,26 @@ class DestinationCode(db.Model):
 
     def __repr__(self) -> str:  # pragma: no cover - representation only
         return f"<DestinationCode {self.id} {self.code}>"
+
+
+class DockDoor(db.Model):
+    """Loading dock door linked to a destination code."""
+
+    __tablename__ = "dock_doors"
+
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String, nullable=False, unique=True)
+    destination_code_id = db.Column(
+        db.Integer, db.ForeignKey("destination_codes.id"), nullable=False
+    )
+    description = db.Column(db.String, nullable=True)
+    is_active = db.Column(db.Boolean, nullable=False, default=True)
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    destination_code = db.relationship("DestinationCode")
+
+    def __repr__(self) -> str:  # pragma: no cover - representation only
+        return f"<DockDoor {self.id} {self.name}>"
