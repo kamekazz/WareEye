@@ -121,10 +121,10 @@ def list_destination_codes() -> str:
         elif DestinationCode.query.filter_by(code=code).first():
             flash("Code already exists", "danger")
         else:
-            db.session.add(DestinationCode(code=code, name=name))
+            db.session.add(DestinationCode(code=code, name=name)) # type: ignore
             db.session.commit()
             flash("Destination code added", "success")
-            return redirect(url_for("scan.list_destination_codes"))
+            return redirect(url_for("scan.list_destination_codes")) # type: ignore
     codes = DestinationCode.query.order_by(DestinationCode.code).all()
     return render_template("destination_codes.html", codes=codes)
 
@@ -173,11 +173,11 @@ def list_dock_doors() -> str:
         elif DockDoor.query.filter_by(name=name).first():
             flash("Name already exists", "danger")
         else:
-            dock = DockDoor(name=name, destination_code_id=int(destination_id))
+            dock = DockDoor(name=name, destination_code_id=int(destination_id)) # type: ignore
             db.session.add(dock)
             db.session.commit()
             flash("Dock door added", "success")
-            return redirect(url_for("scan.list_dock_doors"))
+            return redirect(url_for("scan.list_dock_doors")) # type: ignore
 
     doors = DockDoor.query.order_by(DockDoor.created_at.desc()).all()
     return render_template("dock_doors.html", doors=doors, codes=codes)
