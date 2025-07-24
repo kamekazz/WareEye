@@ -16,7 +16,7 @@ bp = Blueprint("scan", __name__)
 
 @bp.route("/")
 def hello():
-    return "Hello, World from Flask!"
+    return render_template("home.html")
 
 
 @bp.route("/api/scan", methods=["POST"])
