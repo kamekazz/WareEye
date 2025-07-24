@@ -1,27 +1,40 @@
 # WareEye
 
-## Usage
+WareEye is a basic barcode scanning system made up of two Python applications:
 
-### Server
+* **Server** – a small Flask app that stores scan records and provides a simple
+  web interface to browse them.
+* **Client** – a webcam utility that detects barcodes or QR codes and sends the
+  results to the server.
+
+## Running the server
 
 ```bash
 cd Server
+pip install -r requirements.txt
 python app.py
 ```
 
-### Client
+The server listens on port `5000` by default and creates an `app.db` SQLite
+database in the `Server` directory.
+
+## Running the client
 
 ```bash
 cd Client
+pip install -r requirements.txt
 python client.py
 ```
 
-The client prompts for camera details and streams video while scanning for barcodes.
+The client prompts for camera information, opens the webcam or RTSP stream and
+continually scans frames for barcodes. Detected values are sent to the server.
 
-## Community and Contributing
+## How you can help
 
-WareEye is an open source project and we’re looking for enthusiastic contributors.
-Whether you’re a fan of clever hardware (like a comfy recliner) or you just want to
-build better barcode scanning tools, your help is welcome. Fork this repo, open
-issues, or send pull requests to become a collaborator and shape WareEye with us.
+WareEye is very much a work in progress. We would love help with:
 
+* improving detection accuracy and performance
+* polishing the web UI and dashboard
+* packaging the project (e.g. Docker, Windows binaries)
+
+See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to get involved.
