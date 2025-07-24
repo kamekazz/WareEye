@@ -1,0 +1,10 @@
+{
+  "name": "wareeye",
+  "private": true,
+  "devDependencies": {
+    "tailwindcss": "^3.4.1"
+  },
+  "scripts": {
+    "build": "npx tailwindcss -c tailwind.config.js -i tailwind.css -o static/css/main.css --minify"
+  }
+}
