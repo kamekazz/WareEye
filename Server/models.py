@@ -3,6 +3,7 @@ from flask_sqlalchemy import SQLAlchemy
 
 db = SQLAlchemy()
 
+
 class Scan(db.Model):
     """Database model for a scan event."""
 
@@ -13,7 +14,9 @@ class Scan(db.Model):
     client_ip = db.Column(db.String, nullable=False)
     camera_url = db.Column(db.String, nullable=False)
     barcode = db.Column(db.String, nullable=False, index=True)
-    timestamp = db.Column(db.DateTime, nullable=False, index=True, default=datetime.utcnow)
+    timestamp = db.Column(
+        db.DateTime, nullable=False, index=True, default=datetime.utcnow
+    )
 
     def __repr__(self) -> str:  # pragma: no cover - representation only
         return f"<Scan {self.id} {self.barcode}>"
@@ -53,3 +56,24 @@ class DockDoor(db.Model):
 
     def __repr__(self) -> str:  # pragma: no cover - representation only
         return f"<DockDoor {self.id} {self.name}>"
+
+
+class OLPNLabel(db.Model):
+    """Label representing an outbound license plate number (OLPN)."""
+
+    __tablename__ = "olpn_labels"
+
+    id = db.Column(db.Integer, primary_key=True)
+    barcode = db.Column(db.String, nullable=False, unique=True, index=True)
+    destination_code_id = db.Column(
+        db.Integer, db.ForeignKey("destination_codes.id"), nullable=False
+    )
+    created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = db.Column(
+        db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
+
+    destination = db.relationship("DestinationCode")
+
+    def __repr__(self) -> str:  # pragma: no cover - representation only
+        return f"<OLPNLabel {self.id} {self.barcode}>"

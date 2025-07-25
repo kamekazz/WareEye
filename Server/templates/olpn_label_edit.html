@@ -1,0 +1,20 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Edit OLPN Label {{ label.id }}</h1>
+<form method="post">
+  <div class="mb-3">
+    <label class="form-label">Barcode</label>
+    <input type="text" name="barcode" class="form-control" value="{{ label.barcode }}" required>
+  </div>
+  <div class="mb-3">
+    <label class="form-label">Destination</label>
+    <select name="destination_code_id" class="form-select" required>
+      {% for code in codes %}
+      <option value="{{ code.id }}" {% if label.destination_code_id == code.id %}selected{% endif %}>{{ code.code }} - {{ code.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <button type="submit" class="btn btn-primary">Save Changes</button>
+  <a href="{{ url_for('scan.list_olpn_labels') }}" class="btn btn-secondary">Cancel</a>
+</form>
+{% endblock %}

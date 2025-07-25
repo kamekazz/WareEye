@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>OLPN Labels</h1>
+<form method="post" class="row g-3 mb-4">
+  <div class="col-md-4">
+    <input type="text" name="barcode" class="form-control" placeholder="Barcode" required>
+  </div>
+  <div class="col-md-4">
+    <select name="destination_code_id" class="form-select" required>
+      <option value="" disabled selected>Select Destination</option>
+      {% for code in codes %}
+      <option value="{{ code.id }}">{{ code.code }} - {{ code.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2 d-grid">
+    <button type="submit" class="btn btn-primary">Add Label</button>
+  </div>
+</form>
+<table class="table table-bordered table-striped">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Barcode</th>
+      <th>Destination</th>
+      <th>Created At</th>
+      <th>Actions</th>
+    </tr>
+  </thead>
+  <tbody>
+    {% for label in labels %}
+    <tr>
+      <td>{{ label.id }}</td>
+      <td>{{ label.barcode }}</td>
+      <td>{{ label.destination.code }}</td>
+      <td>{{ label.created_at }}</td>
+      <td>
+        <a href="{{ url_for('scan.edit_olpn_label', label_id=label.id) }}" class="btn btn-sm btn-primary">Edit</a>
+        <form method="post" action="{{ url_for('scan.delete_olpn_label', label_id=label.id) }}" style="display:inline;" onsubmit="return confirm('Delete this label?');">
+          <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+        </form>
+      </td>
+    </tr>
+    {% else %}
+    <tr>
+      <td colspan="5" class="text-center">No labels.</td>
+    </tr>
+    {% endfor %}
+  </tbody>
+</table>
+{% endblock %}
