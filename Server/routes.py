@@ -245,7 +245,7 @@ def olpn_label_pdf(label_id: int):
     import io
     import qrcode
     from flask import send_file
-    from reportlab.lib.pagesizes import letter
+    from reportlab.lib.pagesizes import letter, landscape
     from reportlab.pdfgen import canvas
     from reportlab.lib.utils import ImageReader
 
@@ -255,13 +255,42 @@ def olpn_label_pdf(label_id: int):
     qr_img.save(img_buffer, format="PNG")
     img_buffer.seek(0)
 
-    # Build PDF with the QR code and label text
+    # Build PDF with the QR code and label text. Layout: landscape letter with
+    # the label duplicated on the left and right halves of the page so that the
+    # code can be read from either side of a pallet.
     pdf_buffer = io.BytesIO()
-    c = canvas.Canvas(pdf_buffer, pagesize=letter)
-    c.setFont("Helvetica", 14)
-    c.drawString(72, 720, f"Barcode: {label.barcode}")
-    c.drawString(72, 700, f"Destination: {label.destination.code}")
-    c.drawImage(ImageReader(img_buffer), 72, 550, width=150, height=150)
+    c = canvas.Canvas(pdf_buffer, pagesize=landscape(letter))
+
+    width, height = landscape(letter)
+    half_width = width / 2
+    margin = 36  # half-inch margin around content
+    barcode_size = 200
+    y_img = (height - barcode_size) / 2
+
+    for offset in (margin, half_width + margin):
+        c.drawImage(
+            ImageReader(img_buffer),
+            offset,
+            y_img,
+            width=barcode_size,
+            height=barcode_size,
+        )
+        c.setFont("Helvetica", 14)
+        text_y = y_img - 20
+        c.drawCentredString(offset + barcode_size / 2, text_y, label.barcode)
+        c.setFont("Helvetica", 12)
+        c.drawCentredString(
+            offset + barcode_size / 2,
+            text_y - 18,
+            f"Destination: {label.destination.code}",
+        )
+        c.setFont("Helvetica", 8)
+        c.drawCentredString(
+            offset + barcode_size / 2,
+            margin,
+            f"Created: {label.created_at.strftime('%Y-%m-%d %H:%M')}",
+        )
+
     c.showPage()
     c.save()
     pdf_buffer.seek(0)
