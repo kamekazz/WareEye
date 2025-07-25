@@ -35,6 +35,7 @@
       <td>{{ label.destination.code }}</td>
       <td>{{ label.created_at }}</td>
       <td>
+        <a href="{{ url_for('scan.olpn_label_pdf', label_id=label.id) }}" class="btn btn-sm btn-secondary">PDF</a>
         <a href="{{ url_for('scan.edit_olpn_label', label_id=label.id) }}" class="btn btn-sm btn-primary">Edit</a>
         <form method="post" action="{{ url_for('scan.delete_olpn_label', label_id=label.id) }}" style="display:inline;" onsubmit="return confirm('Delete this label?');">
           <button type="submit" class="btn btn-sm btn-danger">Delete</button>

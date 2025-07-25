@@ -237,6 +237,44 @@ def list_olpn_labels() -> str:
     return render_template("olpn_labels.html", labels=labels, codes=codes)
 
 
+@bp.route("/olmp-labels/<int:label_id>/pdf")
+def olpn_label_pdf(label_id: int):
+    """Generate a PDF with the label's QR code."""
+    label = OLPNLabel.query.get_or_404(label_id)
+
+    import io
+    import qrcode
+    from flask import send_file
+    from reportlab.lib.pagesizes import letter
+    from reportlab.pdfgen import canvas
+    from reportlab.lib.utils import ImageReader
+
+    # Create QR code image for the barcode
+    qr_img = qrcode.make(label.barcode)
+    img_buffer = io.BytesIO()
+    qr_img.save(img_buffer, format="PNG")
+    img_buffer.seek(0)
+
+    # Build PDF with the QR code and label text
+    pdf_buffer = io.BytesIO()
+    c = canvas.Canvas(pdf_buffer, pagesize=letter)
+    c.setFont("Helvetica", 14)
+    c.drawString(72, 720, f"Barcode: {label.barcode}")
+    c.drawString(72, 700, f"Destination: {label.destination.code}")
+    c.drawImage(ImageReader(img_buffer), 72, 550, width=150, height=150)
+    c.showPage()
+    c.save()
+    pdf_buffer.seek(0)
+
+    filename = f"label_{label.barcode}.pdf"
+    return send_file(
+        pdf_buffer,
+        mimetype="application/pdf",
+        as_attachment=True,
+        download_name=filename,
+    )
+
+
 @bp.route("/olmp-labels/<int:label_id>/edit", methods=["GET", "POST"])
 def edit_olpn_label(label_id: int):
     """Edit an OLPN label."""
