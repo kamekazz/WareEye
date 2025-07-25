@@ -1,9 +1,9 @@
 {% extends 'base.html' %}
 {% block content %}
-<h1>Dock Doors</h1>
+<h1>OLPN Labels</h1>
 <form method="post" class="row g-3 mb-4">
-  <div class="col-md-3">
-    <input type="text" name="name" class="form-control" placeholder="Name" required>
+  <div class="col-md-4">
+    <input type="text" name="barcode" class="form-control" placeholder="Barcode" required>
   </div>
   <div class="col-md-4">
     <select name="destination_code_id" class="form-select" required>
@@ -14,38 +14,37 @@
     </select>
   </div>
   <div class="col-md-2 d-grid">
-    <button type="submit" class="btn btn-primary">Add Door</button>
+    <button type="submit" class="btn btn-primary">Add Label</button>
   </div>
 </form>
 <table class="table table-bordered table-striped">
   <thead>
     <tr>
       <th>ID</th>
-      <th>Name</th>
+      <th>Barcode</th>
       <th>Destination</th>
       <th>Created At</th>
-      <th>Updated At</th>
       <th>Actions</th>
     </tr>
   </thead>
   <tbody>
-    {% for door in doors %}
+    {% for label in labels %}
     <tr>
-      <td>{{ door.id }}</td>
-      <td>{{ door.name }}</td>
-      <td>{{ door.destination_code.code }}</td>
-      <td>{{ door.created_at }}</td>
-      <td>{{ door.updated_at }}</td>
+      <td>{{ label.id }}</td>
+      <td>{{ label.barcode }}</td>
+      <td>{{ label.destination.code }}</td>
+      <td>{{ label.created_at }}</td>
       <td>
-        <a href="{{ url_for('scan.edit_dock_door', door_id=door.id) }}" class="btn btn-sm btn-primary">Edit</a>
-        <form method="post" action="{{ url_for('scan.delete_dock_door', door_id=door.id) }}" style="display:inline;" onsubmit="return confirm('Delete this door?');">
+        <a href="{{ url_for('facility.olpn_label_pdf', label_id=label.id) }}" class="btn btn-sm btn-secondary">PDF</a>
+        <a href="{{ url_for('facility.edit_olpn_label', label_id=label.id) }}" class="btn btn-sm btn-primary">Edit</a>
+        <form method="post" action="{{ url_for('facility.delete_olpn_label', label_id=label.id) }}" style="display:inline;" onsubmit="return confirm('Delete this label?');">
           <button type="submit" class="btn btn-sm btn-danger">Delete</button>
         </form>
       </td>
     </tr>
     {% else %}
     <tr>
-      <td colspan="6" class="text-center">No dock doors.</td>
+      <td colspan="5" class="text-center">No labels.</td>
     </tr>
     {% endfor %}
   </tbody>

@@ -2,7 +2,7 @@
 {% block content %}
 <h1>Scans</h1>
 
-<form method="get" class="row g-3 mb-4" action="{{ url_for('scan.list_scans') }}">
+<form method="get" class="row g-3 mb-4" action="{{ url_for('facility.list_scans') }}">
   <div class="col-md-2">
     <input type="text" name="barcode" class="form-control" placeholder="Barcode" value="{{ args.get('barcode', '') }}">
   </div>
@@ -20,7 +20,7 @@
   </div>
   <div class="col-md-2 d-flex">
     <button type="submit" class="btn btn-primary me-2">Search</button>
-    <a href="{{ url_for('scan.list_scans') }}" class="btn btn-secondary">Clear</a>
+    <a href="{{ url_for('facility.list_scans') }}" class="btn btn-secondary">Clear</a>
   </div>
 </form>
 
@@ -51,8 +51,8 @@
       <td>{{ scan.barcode }}</td>
       <td>{{ scan.timestamp }}</td>
       <td>
-        <a href="{{ url_for('scan.edit_scan', scan_id=scan.id) }}" class="btn btn-sm btn-primary">Edit</a>
-        <form method="post" action="{{ url_for('scan.delete_scan', scan_id=scan.id) }}" style="display:inline;" onsubmit="return confirm('Delete this scan?');">
+        <a href="{{ url_for('facility.edit_scan', scan_id=scan.id) }}" class="btn btn-sm btn-primary">Edit</a>
+        <form method="post" action="{{ url_for('facility.delete_scan', scan_id=scan.id) }}" style="display:inline;" onsubmit="return confirm('Delete this scan?');">
           <button type="submit" class="btn btn-sm btn-danger">Delete</button>
         </form>
       </td>
@@ -69,11 +69,11 @@
 <nav>
   <ul class="pagination">
     <li class="page-item {% if not scans.has_prev %}disabled{% endif %}">
-      <a class="page-link" href="{{ url_for('scan.list_scans', page=scans.prev_num, **args) }}">Prev</a>
+      <a class="page-link" href="{{ url_for('facility.list_scans', page=scans.prev_num, **args) }}">Prev</a>
     </li>
     <li class="page-item disabled"><span class="page-link">Page {{ scans.page }} of {{ scans.pages }}</span></li>
     <li class="page-item {% if not scans.has_next %}disabled{% endif %}">
-      <a class="page-link" href="{{ url_for('scan.list_scans', page=scans.next_num, **args) }}">Next</a>
+      <a class="page-link" href="{{ url_for('facility.list_scans', page=scans.next_num, **args) }}">Next</a>
     </li>
   </ul>
 </nav>
