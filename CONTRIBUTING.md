@@ -1,49 +1,61 @@
 # Contributing to WareEye
 
-Thank you for your interest in helping improve WareEye! Contributions of all
-sizes are welcome. This project is split into a Python server and client so most
-changes will involve one or both of those components.
+Thanks for checking out **WareEye**! We are building a real-time pallet tracking system and welcome contributions of all kinds. Whether you enjoy polishing dashboards or squeezing every last millisecond out of computer-vision code, there is a place for you here.
 
-## Getting started
+## Where We Need the Most Help
 
-1. Fork the repository and clone your fork.
-2. Install the dependencies for the part you want to work on:
+| Area | What We’re After | Tech Stack |
+|------|-------------------|-----------|
+| ✨ **UI / UX** | Improve the Flask-served dashboard (dark Tailwind theme) — better tables, filters, mobile layout, clean design tokens, iconography. | Jinja2 · Tailwind CSS · Vanilla JS (no Bootstrap) |
+| 🚀 **Scan Speed / Accuracy** | Swap our basic pyzbar pipeline for something faster and more robust. Ideas welcome: YOLO-v8 barcode head, ZBar OpenCL branch, OpenCV DNN, etc. | Python · OpenCV · (YOLO, ONNX, TensorRT...your pick) |
+| 🛠 **Packaging & DevOps** | Docker-compose setup, Raspberry Pi builds, GitHub Actions CI, systemd service templates. | Docker · bash · GitHub Actions |
+| 📝 **Docs & Tests** | Better README diagrams, CONTRIBUTING how-tos, unit/integration tests. | Markdown · PyTest |
 
-   ```bash
-   cd Server
-   pip install -r requirements.txt
-   ```
+## Quick Start
 
-   and/or
+```bash
+# fork + clone, then:
 
-   ```bash
-   cd Client
-   pip install -r requirements.txt
-   ```
+# --- Server ---
+cd Server
+pip install -r requirements.txt
+python app.py     # localhost:5000
 
-3. Run the applications to ensure they start correctly before making changes:
+# --- Client ---
+cd ../Client
+pip install -r requirements.txt
+python client.py  # streams webcam / RTSP and posts scans
+```
 
-   ```bash
-   python Server/app.py
-   python Client/client.py
-   ```
+Python 3.12+ is required for both components.
 
-## Making changes
+## Coding Conventions
 
-* Use Python 3.12 or newer.
-* Keep code style consistent with the existing project (we use
-  [black](https://black.readthedocs.io/) for formatting).
-* Include docstrings and comments where helpful.
-* If adding features or fixing bugs, consider adding tests if possible.
+* **Formatter:** [black](https://black.readthedocs.io/) (`black .` before you commit).
+* **Linter:** [ruff](https://beta.ruff.rs/) (optional, but recommended).
+* **Type hints:** please add them where obvious.
+* **Docstrings / comments:** keep them short and practical.
 
-## Submitting a pull request
+## How to Contribute
 
-1. Create a new branch in your fork for each set of related changes.
-2. Push the branch and open a pull request against the `main` branch of this
-   repository.
-3. Provide a clear description of what you changed and why.
-4. Ensure `pip install -r requirements.txt` succeeds for both `Server` and
-   `Client` before submitting.
+1. Fork the repo and create a topic branch (`feat/ui-filter-bar`, `perf/yolo-decoder`, etc.).
+2. Commit small, logical chunks.
+3. Open a pull request against `main` with:
+   - A clear summary of what and why.
+   - Screenshots or benchmarks if you touched UI or performance code.
+   - Confirmation that `pip install -r requirements.txt` works for both `Server/` and `Client/`.
+4. Be ready for friendly code review—together we’ll polish and merge.
 
-We will review your pull request and work with you to get it merged. Thanks for
-helping make WareEye better!
+## Community
+
+* **Issues** – Any bug, feature idea, or performance tip: open it!
+* **Discussions** – Planning big changes? Start the conversation there.
+* **Slack / Discord (coming soon)** – Live chat once the project gains steam.
+
+We especially welcome contributors who:
+
+* 💜 Enjoy crafting clean, responsive Tailwind interfaces.
+* 🤖 Have experience with YOLO, OpenCV DNN, or GPU acceleration.
+* 🐧 Like turning rough scripts into rock-solid Docker images or systemd services.
+
+Come build the warehouse “eye” with us!
