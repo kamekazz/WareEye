@@ -9,7 +9,7 @@ from flask import (
     flash,
 )
 
-from models import db, Scan, DestinationCode, DockDoor
+from models import db, Scan, DestinationCode, DockDoor, OLPNLabel
 
 bp = Blueprint("scan", __name__)
 
@@ -30,20 +30,20 @@ def ingest_scan() -> tuple:
         else:
             timestamp = datetime.utcnow()
         scan = Scan(
-            camera_name=data["camera_name"], # type: ignore
-            area=data["area"], # type: ignore
-            camera_type=data["camera_type"], # type: ignore
-            client_ip=data["client_ip"], # type: ignore
-            camera_url=data["camera_url"], # type: ignore
-            barcode=data["barcode"], # type: ignore
-            timestamp=timestamp, # type: ignore
+            camera_name=data["camera_name"],  # type: ignore
+            area=data["area"],  # type: ignore
+            camera_type=data["camera_type"],  # type: ignore
+            client_ip=data["client_ip"],  # type: ignore
+            camera_url=data["camera_url"],  # type: ignore
+            barcode=data["barcode"],  # type: ignore
+            timestamp=timestamp,  # type: ignore
         )
     except Exception as exc:  # pragma: no cover - input errors
         return jsonify({"error": f"Invalid payload: {exc}"}), 400
 
     db.session.add(scan)
     db.session.commit()
-    return jsonify({"status": "success", "id": scan.id}) # type: ignore
+    return jsonify({"status": "success", "id": scan.id})  # type: ignore
 
 
 @bp.route("/scans")
@@ -68,9 +68,7 @@ def list_scans() -> str:
     if end_date:
         q = q.filter(Scan.timestamp <= end_date)
 
-    scans = (
-        q.order_by(Scan.timestamp.desc()).paginate(page=page, per_page=50)
-    )
+    scans = q.order_by(Scan.timestamp.desc()).paginate(page=page, per_page=50)
 
     args = request.args.to_dict()
     args.pop("page", None)
@@ -121,10 +119,10 @@ def list_destination_codes() -> str:
         elif DestinationCode.query.filter_by(code=code).first():
             flash("Code already exists", "danger")
         else:
-            db.session.add(DestinationCode(code=code, name=name)) # type: ignore
+            db.session.add(DestinationCode(code=code, name=name))  # type: ignore
             db.session.commit()
             flash("Destination code added", "success")
-            return redirect(url_for("scan.list_destination_codes")) # type: ignore
+            return redirect(url_for("scan.list_destination_codes"))  # type: ignore
     codes = DestinationCode.query.order_by(DestinationCode.code).all()
     return render_template("destination_codes.html", codes=codes)
 
@@ -173,11 +171,11 @@ def list_dock_doors() -> str:
         elif DockDoor.query.filter_by(name=name).first():
             flash("Name already exists", "danger")
         else:
-            dock = DockDoor(name=name, destination_code_id=int(destination_id)) # type: ignore
+            dock = DockDoor(name=name, destination_code_id=int(destination_id))  # type: ignore
             db.session.add(dock)
             db.session.commit()
             flash("Dock door added", "success")
-            return redirect(url_for("scan.list_dock_doors")) # type: ignore
+            return redirect(url_for("scan.list_dock_doors"))  # type: ignore
 
     doors = DockDoor.query.order_by(DockDoor.created_at.desc()).all()
     return render_template("dock_doors.html", doors=doors, codes=codes)
@@ -193,7 +191,9 @@ def edit_dock_door(door_id: int):
         destination_id = request.form.get("destination_code_id")
         if not name or not destination_id:
             flash("Name and Destination are required", "danger")
-        elif DockDoor.query.filter(DockDoor.name == name, DockDoor.id != door_id).first():
+        elif DockDoor.query.filter(
+            DockDoor.name == name, DockDoor.id != door_id
+        ).first():
             flash("Name already exists", "danger")
         else:
             door.name = name
@@ -214,3 +214,57 @@ def delete_dock_door(door_id: int):
     db.session.commit()
     flash("Dock door deleted", "success")
     return redirect(url_for("scan.list_dock_doors"))
+
+
+@bp.route("/olmp-labels", methods=["GET", "POST"])
+def list_olpn_labels() -> str:
+    """List OLPN labels and handle creation."""
+    codes = DestinationCode.query.order_by(DestinationCode.code).all()
+    if request.method == "POST":
+        barcode = request.form.get("barcode", "").strip()
+        destination_id = request.form.get("destination_code_id")
+        if not barcode or not destination_id:
+            flash("Barcode and Destination are required", "danger")
+        elif OLPNLabel.query.filter_by(barcode=barcode).first():
+            flash("Barcode already exists", "danger")
+        else:
+            label = OLPNLabel(barcode=barcode, destination_code_id=int(destination_id))
+            db.session.add(label)
+            db.session.commit()
+            flash("Label added", "success")
+            return redirect(url_for("scan.list_olpn_labels"))
+    labels = OLPNLabel.query.order_by(OLPNLabel.created_at.desc()).all()
+    return render_template("olpn_labels.html", labels=labels, codes=codes)
+
+
+@bp.route("/olmp-labels/<int:label_id>/edit", methods=["GET", "POST"])
+def edit_olpn_label(label_id: int):
+    """Edit an OLPN label."""
+    label = OLPNLabel.query.get_or_404(label_id)
+    codes = DestinationCode.query.order_by(DestinationCode.code).all()
+    if request.method == "POST":
+        barcode = request.form.get("barcode", "").strip()
+        destination_id = request.form.get("destination_code_id")
+        if not barcode or not destination_id:
+            flash("Barcode and Destination are required", "danger")
+        elif OLPNLabel.query.filter(
+            OLPNLabel.barcode == barcode, OLPNLabel.id != label_id
+        ).first():
+            flash("Barcode already exists", "danger")
+        else:
+            label.barcode = barcode
+            label.destination_code_id = int(destination_id)
+            db.session.commit()
+            flash("Label updated", "success")
+            return redirect(url_for("scan.list_olpn_labels"))
+    return render_template("olpn_label_edit.html", label=label, codes=codes)
+
+
+@bp.route("/olmp-labels/<int:label_id>/delete", methods=["POST"])
+def delete_olpn_label(label_id: int):
+    """Delete an OLPN label."""
+    label = OLPNLabel.query.get_or_404(label_id)
+    db.session.delete(label)
+    db.session.commit()
+    flash("Label deleted", "success")
+    return redirect(url_for("scan.list_olpn_labels"))
