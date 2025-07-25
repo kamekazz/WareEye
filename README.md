@@ -1,13 +1,31 @@
+
 # WareEye
 
-WareEye is a basic barcode scanning system made up of two Python applications:
+WareEye is a real-time pallet tracking and validation system built for
+warehouse environments. It combines video-based barcode scanning with
+centralized logging and a simple dashboard for visibility and control.
 
-* **Server** – a small Flask app that stores scan records and provides a simple
-  web interface to browse them.
-* **Client** – a webcam utility that detects barcodes or QR codes and sends the
-  results to the server.
+## What It Does
 
-## Running the server
+WareEye consists of two Python components:
+
+* **Server** – a lightweight Flask app that stores barcode scans and provides a
+  simple web interface to review scan records.
+* **Client** – a video stream scanner that detects barcodes (e.g. QR, Code128)
+  via webcam or RTSP and sends scan results to the server.
+
+## Core Features
+
+### 📦 Pallet Tracking
+Detects and tracks barcoded pallets as they move throughout the warehouse using
+live camera feeds.
+
+### 🚚 Load Validation
+Automatically validates that the correct pallets are being loaded into outbound
+trucks—without requiring the driver to leave the vehicle. This is especially
+useful when handling expensive or sensitive shipments.
+
+## Running the Server
 
 ```bash
 cd Server
@@ -15,10 +33,10 @@ pip install -r requirements.txt
 python app.py
 ```
 
-The server listens on port `5000` by default and creates an `app.db` SQLite
-database in the `Server` directory.
+By default the server runs on port `5000` and stores scans in `app.db`
+(SQLite).
 
-## Running the client
+## Running the Client
 
 ```bash
 cd Client
@@ -26,15 +44,16 @@ pip install -r requirements.txt
 python client.py
 ```
 
-The client prompts for camera information, opens the webcam or RTSP stream and
-continually scans frames for barcodes. Detected values are sent to the server.
+The client opens a webcam or RTSP stream and continuously scans video frames
+for barcodes. Each detected code is sent to the server with a timestamp.
 
-## How you can help
+## How You Can Help
 
-WareEye is very much a work in progress. We would love help with:
+WareEye is a work in progress, and we're looking for collaborators! You can
+help us improve:
 
-* improving detection accuracy and performance
-* polishing the web UI and dashboard
-* packaging the project (e.g. Docker, Windows binaries)
+* 📈 Detection accuracy and frame processing speed
+* 🎨 The UI and scan dashboard
+* 📦 Packaging for Docker, Windows, and embedded devices (e.g. Raspberry Pi)
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for details on how to get involved.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get involved!
