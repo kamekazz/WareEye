@@ -28,8 +28,8 @@
       <td>{{ c.code }}</td>
       <td>{{ c.name }}</td>
       <td>
-        <a href="{{ url_for('scan.edit_destination_code', code_id=c.id) }}" class="btn btn-sm btn-primary">Edit</a>
-        <form method="post" action="{{ url_for('scan.delete_destination_code', code_id=c.id) }}" style="display:inline;" onsubmit="return confirm('Delete this code?');">
+        <a href="{{ url_for('facility.edit_destination_code', code_id=c.id) }}" class="btn btn-sm btn-primary">Edit</a>
+        <form method="post" action="{{ url_for('facility.delete_destination_code', code_id=c.id) }}" style="display:inline;" onsubmit="return confirm('Delete this code?');">
           <button type="submit" class="btn btn-sm btn-danger">Delete</button>
         </form>
       </td>

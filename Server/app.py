@@ -4,6 +4,8 @@ from flask import Flask
 from flask_cors import CORS
 from models import db  # type: ignore
 from routes import bp
+from facility_routes import facility_bp
+from operations_routes import operations_bp
 
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
@@ -13,6 +15,8 @@ db.init_app(app)
 CORS(app)
 
 app.register_blueprint(bp)
+app.register_blueprint(facility_bp)
+app.register_blueprint(operations_bp)
 
 if __name__ == "__main__":
     with app.app_context():
