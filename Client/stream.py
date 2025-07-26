@@ -7,13 +7,13 @@ import os
 from typing import Dict
 import time
 
-import cv2
-from pyzbar import pyzbar
+import cv2 # type: ignore
+from pyzbar import pyzbar # type: ignore
 
 from utils import send_barcode
 
 try:
-    from ultralytics import YOLO
+    from ultralytics import YOLO # type: ignore
 except ImportError:  # pragma: no cover - optional dependency
     YOLO = None  # type: ignore
 
