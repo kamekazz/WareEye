@@ -14,6 +14,13 @@
       {% endfor %}
     </select>
   </div>
+  <div class="mb-3">
+    <label class="form-label">Status</label>
+    <select name="status" class="form-select" required>
+      <option value="pending" {% if label.status == 'pending' %}selected{% endif %}>Pending</option>
+      <option value="shipped" {% if label.status == 'shipped' %}selected{% endif %}>Shipped</option>
+    </select>
+  </div>
   <button type="submit" class="btn btn-primary">Save Changes</button>
   <a href="{{ url_for('facility.list_olpn_labels') }}" class="btn btn-secondary">Cancel</a>
 </form>
