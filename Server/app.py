@@ -1,7 +1,7 @@
 """Simple Flask application for barcode scan ingestion and CRUD UI."""
 
-from flask import Flask
-from flask_cors import CORS
+from flask import Flask # type: ignore
+from flask_cors import CORS # type: ignore
 from models import db  # type: ignore
 from routes import bp
 from facility_routes import facility_bp
