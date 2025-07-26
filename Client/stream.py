@@ -52,6 +52,9 @@ def run_stream(cap: cv2.VideoCapture, camera_info: Dict[str, str], args) -> None
                 f"YOLO model file '{model_path}' not found. Barcode detection with YOLO disabled."
             )
 
+    cv2.namedWindow("Security Camera Stream", cv2.WINDOW_NORMAL)
+    cv2.resizeWindow("Security Camera Stream", 250, 250)
+
     while True:
         ret, frame = cap.read()
         if not ret:
@@ -187,7 +190,8 @@ def run_stream(cap: cv2.VideoCapture, camera_info: Dict[str, str], args) -> None
         else:
             flash_color = None
 
-        cv2.imshow("Security Camera Stream", display_frame)
+        small_frame = cv2.resize(display_frame, (250, 250))
+        cv2.imshow("Security Camera Stream", small_frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):
             break
 
