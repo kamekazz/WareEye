@@ -10,7 +10,7 @@ from operations_routes import operations_bp
 app = Flask(__name__)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///app.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-app.config["SECRET_KEY"] = "dev"
+app.config["SECRET_KEY"] = "dev"# This should be changed in production
 db.init_app(app)
 CORS(app)
 
