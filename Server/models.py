@@ -68,6 +68,7 @@ class OLPNLabel(db.Model):
     destination_code_id = db.Column(
         db.Integer, db.ForeignKey("destination_codes.id"), nullable=False
     )
+    status = db.Column(db.String(16), nullable=False, default="pending")
     created_at = db.Column(db.DateTime, nullable=False, default=datetime.utcnow)
     updated_at = db.Column(
         db.DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow

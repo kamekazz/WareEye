@@ -6,7 +6,7 @@ from __future__ import annotations
 import os
 import time
 import urllib.request
-from typing import Dict
+from typing import Dict, Optional
 
 import requests
 
@@ -40,14 +40,17 @@ def parse_camera_info(info_path: str) -> Dict[str, str]:
     return info
 
 
-def send_barcode(data: str, info: Dict[str, str], last: Dict[str, float]) -> None:
-    """Send scanned ``data`` to the server with rate limiting."""
+def send_barcode(data: str, info: Dict[str, str], last: Dict[str, float]) -> Optional[bool]:
+    """Send scanned ``data`` to the server with rate limiting.
+
+    Returns the validation result if provided by the server.
+    """
     if not data:
-        return
+        return None
 
     now = time.time()
     if now - last.get(data, 0) < 2:
-        return
+        return None
 
     payload = {
         "barcode": data,
@@ -60,8 +63,17 @@ def send_barcode(data: str, info: Dict[str, str], last: Dict[str, float]) -> Non
     url = f"http://{info.get('Server IP', 'localhost')}:{info.get('Port', '5000')}/api/scan"
 
     try:
-        requests.post(url, json=payload, timeout=2)
+        resp = requests.post(url, json=payload, timeout=2)
+        if resp.ok:
+            try:
+                result = resp.json()
+                if "valid" in result:
+                    last[data] = now
+                    return bool(result["valid"])
+            except Exception:
+                pass
     except Exception as exc:  # pragma: no cover - network or server errors
         print(f"Failed to send barcode data: {exc}")
 
     last[data] = now
+    return None
