@@ -5,6 +5,7 @@ from __future__ import annotations
 
 import os
 from typing import Dict
+import time
 
 import cv2
 from pyzbar import pyzbar
@@ -20,6 +21,8 @@ except ImportError:  # pragma: no cover - optional dependency
 def run_stream(cap: cv2.VideoCapture, camera_info: Dict[str, str], args) -> None:
     """Display ``cap`` frames and detect barcodes/QR codes."""
     last_scanned: Dict[str, float] = {}
+    flash_color = None
+    flash_end = 0.0
 
     detector = cv2.QRCodeDetector()
     barcode_detector = cv2.barcode_BarcodeDetector()  # type: ignore
@@ -75,7 +78,10 @@ def run_stream(cap: cv2.VideoCapture, camera_info: Dict[str, str], args) -> None
                         (0, 255, 0),
                         2,
                     )
-                    send_barcode(text, camera_info, last_scanned)
+                    result = send_barcode(text, camera_info, last_scanned)
+                    if result is not None:
+                        flash_color = (0, 255, 0) if result else (0, 0, 255)
+                        flash_end = time.time() + 1.5
         else:
             data, bbox, _ = detector.detectAndDecode(gray)
             if bbox is not None and len(bbox):
@@ -91,7 +97,10 @@ def run_stream(cap: cv2.VideoCapture, camera_info: Dict[str, str], args) -> None
                         (0, 255, 0),
                         2,
                     )
-                    send_barcode(data, camera_info, last_scanned)
+                    result = send_barcode(data, camera_info, last_scanned)
+                    if result is not None:
+                        flash_color = (0, 255, 0) if result else (0, 0, 255)
+                        flash_end = time.time() + 1.5
             else:
                 texts, w_points = [], []
                 if wechat_detector is not None:
@@ -114,7 +123,10 @@ def run_stream(cap: cv2.VideoCapture, camera_info: Dict[str, str], args) -> None
                                 (0, 255, 0),
                                 2,
                             )
-                            send_barcode(text, camera_info, last_scanned)
+                            result = send_barcode(text, camera_info, last_scanned)
+                            if result is not None:
+                                flash_color = (0, 255, 0) if result else (0, 0, 255)
+                                flash_end = time.time() + 1.5
                 else:
                     barcodes = pyzbar.decode(gray)
                     if not barcodes and yolo_model is not None:
@@ -143,7 +155,10 @@ def run_stream(cap: cv2.VideoCapture, camera_info: Dict[str, str], args) -> None
                                         (0, 255, 0),
                                         2,
                                     )
-                                    send_barcode(barcode_data, camera_info, last_scanned)
+                                    result = send_barcode(barcode_data, camera_info, last_scanned)
+                                    if result is not None:
+                                        flash_color = (0, 255, 0) if result else (0, 0, 255)
+                                        flash_end = time.time() + 1.5
                             else:
                                 cv2.rectangle(display_frame, (x1, y1), (x2, y2), (0, 255, 255), 2)
                     else:
@@ -160,7 +175,17 @@ def run_stream(cap: cv2.VideoCapture, camera_info: Dict[str, str], args) -> None
                                 (0, 255, 0),
                                 2,
                             )
-                            send_barcode(barcode_data, camera_info, last_scanned)
+                            result = send_barcode(barcode_data, camera_info, last_scanned)
+                            if result is not None:
+                                flash_color = (0, 255, 0) if result else (0, 0, 255)
+                                flash_end = time.time() + 1.5
+
+        if flash_color is not None and time.time() < flash_end:
+            overlay = display_frame.copy()
+            overlay[:] = flash_color
+            cv2.addWeighted(overlay, 0.3, display_frame, 0.7, 0, display_frame)
+        else:
+            flash_color = None
 
         cv2.imshow("Security Camera Stream", display_frame)
         if cv2.waitKey(1) & 0xFF == ord("q"):

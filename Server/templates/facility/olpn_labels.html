@@ -23,6 +23,7 @@
       <th>ID</th>
       <th>Barcode</th>
       <th>Destination</th>
+      <th>Status</th>
       <th>Created At</th>
       <th>Actions</th>
     </tr>
@@ -33,6 +34,7 @@
       <td>{{ label.id }}</td>
       <td>{{ label.barcode }}</td>
       <td>{{ label.destination.code }}</td>
+      <td>{{ label.status }}</td>
       <td>{{ label.created_at }}</td>
       <td>
         <a href="{{ url_for('facility.olpn_label_pdf', label_id=label.id) }}" class="btn btn-sm btn-secondary">PDF</a>
@@ -44,7 +46,7 @@
     </tr>
     {% else %}
     <tr>
-      <td colspan="5" class="text-center">No labels.</td>
+      <td colspan="6" class="text-center">No labels.</td>
     </tr>
     {% endfor %}
   </tbody>

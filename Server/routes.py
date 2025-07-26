@@ -1,7 +1,7 @@
 from datetime import datetime
 from flask import Blueprint, jsonify, render_template, request
 
-from models import db, Scan
+from models import db, Scan, DockDoor, OLPNLabel
 
 bp = Blueprint("scan", __name__)
 
@@ -34,7 +34,26 @@ def ingest_scan() -> tuple:
         return jsonify({"error": f"Invalid payload: {exc}"}), 400
 
     db.session.add(scan)
+
+    valid = None
+    if scan.area.startswith("DD"):
+        dock = DockDoor.query.filter_by(name=scan.area).first()
+        label = OLPNLabel.query.filter_by(barcode=scan.barcode).first()
+        valid = (
+            dock is not None
+            and label is not None
+            and label.destination_code_id == dock.destination_code_id
+        )
+        if valid and label.status != "shipped":  # type: ignore[union-attr]
+            label.status = "shipped"  # type: ignore[union-attr]
+            label.updated_at = datetime.utcnow()  # type: ignore[union-attr]
+            db.session.add(label)  # ensure updated
+
     db.session.commit()
-    return jsonify({"status": "success", "id": scan.id})  # type: ignore
+
+    resp = {"status": "success", "id": scan.id}
+    if valid is not None:
+        resp["valid"] = valid
+    return jsonify(resp)  # type: ignore
 
 
