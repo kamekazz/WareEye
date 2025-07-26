@@ -632,3 +632,16 @@ video {
         padding-right: 2rem
     }
 }
+
+/* Custom navigation styles */
+.navbar {
+    background-color: #e5e7eb;
+}
+
+.nav-link {
+    text-decoration: none;
+}
+
+.nav-link:hover {
+    color: #532249;
+}
