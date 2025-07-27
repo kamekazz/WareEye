@@ -68,6 +68,8 @@ The project ships with two camera modules:
 ```bash
 # pick one of the camera folders
 cd security-camera-server  # or dock-door-server
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 python client.py
 ```
