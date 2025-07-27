@@ -21,11 +21,20 @@ cd Server
 pip install -r requirements.txt
 python app.py     # localhost:5000
 
-# --- Client ---
-cd ../Client
+Pick one and run:
+
+```bash
+cd security-camera-server  # or dock-door-server
 pip install -r requirements.txt
-python client.py  # streams webcam / RTSP and posts scans
+python client.py
 ```
+## Sample Data
+
+Use the `EX/` folder to load sample images or CSVs and simulate barcode scans without a live camera.
+
+## Setup Video
+
+Need a quick walkthrough? Watch <https://youtu.be/b42MZwiKGsM?si=vZiyP3EjoFAV4in2>.
 
 Python 3.12+ is required for both components.
 
