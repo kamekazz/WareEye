@@ -7,12 +7,19 @@ centralized logging and a simple dashboard for visibility and control.
 
 ## What It Does
 
-WareEye consists of two Python components:
+WareEye is organized into three main folders:
 
 * **Server** – a lightweight Flask app that stores barcode scans and provides a
   simple web interface to review scan records.
-* **Client** – a video stream scanner that detects barcodes (e.g. QR, Code128)
-  via webcam or RTSP and sends scan results to the server.
+* **security-camera-server** – camera client for general surveillance and
+  pallet tracking around the warehouse.
+* **dock-door-server** – camera client focused on dock door barcode
+  validation.
+
+### Setup Video
+
+Prefer a walkthrough? Check out our quick start video:
+<https://youtu.be/b42MZwiKGsM?si=vZiyP3EjoFAV4in2>
 
 ## Core Features
 
@@ -36,16 +43,28 @@ python app.py
 By default the server runs on port `5000` and stores scans in `app.db`
 (SQLite).
 
-## Running the Client
+## Running the Camera Clients
+
+The project ships with two camera modules:
+
+* `security-camera-server/` – for general warehouse surveillance and pallet tracking.
+* `dock-door-server/` – for barcode validation at dock doors.
 
 ```bash
-cd Client
+# pick one of the camera folders
+cd security-camera-server  # or dock-door-server
 pip install -r requirements.txt
 python client.py
 ```
 
-The client opens a webcam or RTSP stream and continuously scans video frames
-for barcodes. Each detected code is sent to the server with a timestamp.
+Each camera module opens a webcam or RTSP stream and continuously scans frames
+for barcodes. Detected codes are sent to the server with a timestamp.
+
+### Example Data (EX/)
+
+Use the `EX/` folder to try WareEye without a live camera. It contains sample
+images and CSVs so you can simulate barcode scans and test the pipeline end to
+end.
 
 ## How You Can Help
 
