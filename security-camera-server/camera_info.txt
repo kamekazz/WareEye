@@ -1,0 +1,7 @@
+Camera Name: web
+Camera Area: DD-26
+Camera Type: usb
+Server IP: 127.0.0.1
+Port: 5000
+Client IP: 
+Camera URL: 0
