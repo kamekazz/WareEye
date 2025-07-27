@@ -1,60 +1,143 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="en">
   <head>
-    <meta charset="utf-8">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>WareEye</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='css/main.css') }}">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
-    <link rel="icon" href="{{ url_for('static', filename='img/brand/favicon.ico') }}">
+    <link
+      rel="stylesheet"
+      href="{{ url_for('static', filename='css/main.css') }}"
+    />
+    <!-- <link
+      rel="stylesheet"
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"
+    /> -->
+    <link
+      rel="icon"
+      href="{{ url_for('static', filename='img/brand/favicon.ico') }}"
+    />
   </head>
   <body class="bg-gray-100">
-    <div class="bg-primary-light text-white px-4 py-2">
-      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="flex items-center justify-between h-16">
-          <div class="flex items-center">
-            <a href="{{ url_for('scan.hello') }}" class="text-xl font-semibold text-white">WareEye</a>
-            <div class="hidden md:block ml-10 space-x-4">
-              <a href="{{ url_for('scan.hello') }}" class="px-3 py-2 rounded-md text-sm font-medium {% if request.endpoint == 'scan.hello' %}text-white{% else %}text-white hover:text-gray-300{% endif %}">Home</a>
-              <a href="{{ url_for('facility.list_scans') }}" class="px-3 py-2 rounded-md text-sm font-medium {% if request.endpoint == 'facility.list_scans' %}text-white{% else %}text-white hover:text-gray-300{% endif %}">Scans</a>
-              <a href="{{ url_for('facility.list_destination_codes') }}" class="px-3 py-2 rounded-md text-sm font-medium {% if request.endpoint == 'facility.list_destination_codes' %}text-white{% else %}text-white hover:text-gray-300{% endif %}">Destination Codes</a>
-              <a href="{{ url_for('facility.list_dock_doors') }}" class="px-3 py-2 rounded-md text-sm font-medium {% if request.endpoint == 'facility.list_dock_doors' %}text-white{% else %}text-white hover:text-gray-300{% endif %}">Dock Doors</a>
-              <a href="{{ url_for('facility.list_olpn_labels') }}" class="px-3 py-2 rounded-md text-sm font-medium {% if request.endpoint == 'facility.list_olpn_labels' %}text-white{% else %}text-white hover:text-gray-300{% endif %}">OLPN Labels</a>
-              <a href="{{ url_for('operations.loading_dashboard') }}" class="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-gray-300">Stream / Live Feed</a>
-            </div>
-          </div>
-          <div class="md:hidden">
-            <button id="mobile-menu-button" class="text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-primary">
-              <svg class="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-              </svg>
-            </button>
-          </div>
+    <div
+      class="relative w-screen mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between bg-primary-light text-white py-2"
+    >
+      <div class="flex items-center h-16 container">
+        <a
+          href="{{ url_for('scan.hello') }}"
+          class="text-xl font-semibold text-white flex border-white items-center text-center"
+          >WareEye</a
+        >
+        <div class="hidden md:block ml-50 space-x-4 container text-center">
+          <a
+            href="{{ url_for('facility.list_scans') }}"
+            class="px-3 py-2 rounded-md text-sm font-medium {% if request.endpoint == 'facility.list_scans' %}text-white{% else %}text-white hover:text-gray-300{% endif %}"
+            >Scans</a
+          >
+          <a
+            href="{{ url_for('facility.list_destination_codes') }}"
+            class="px-3 py-2 rounded-md text-sm font-medium {% if request.endpoint == 'facility.list_destination_codes' %}text-white{% else %}text-white hover:text-gray-300{% endif %}"
+            >Destination Codes</a
+          >
+          <a
+            href="{{ url_for('facility.list_dock_doors') }}"
+            class="px-3 py-2 rounded-md text-sm font-medium {% if request.endpoint == 'facility.list_dock_doors' %}text-white{% else %}text-white hover:text-gray-300{% endif %}"
+            >Dock Doors</a
+          >
+          <a
+            href="{{ url_for('facility.list_olpn_labels') }}"
+            class="px-3 py-2 rounded-md text-sm font-medium {% if request.endpoint == 'facility.list_olpn_labels' %}text-white{% else %}text-white hover:text-gray-300{% endif %}"
+            >OLPN Labels</a
+          >
+          <a
+            href="{{ url_for('operations.loading_dashboard') }}"
+            class="px-3 py-2 rounded-md text-sm font-medium text-white hover:text-gray-300"
+            >Stream</a
+          >
         </div>
       </div>
-      <div id="mobile-menu" class="hidden md:hidden px-2 pt-2 pb-3 space-y-1">
-        <a href="{{ url_for('scan.hello') }}" class="block px-3 py-2 rounded-md text-base font-medium {% if request.endpoint == 'scan.hello' %}text-white{% else %}text-white hover:text-gray-300{% endif %}">Home</a>
-        <a href="{{ url_for('facility.list_scans') }}" class="block px-3 py-2 rounded-md text-base font-medium {% if request.endpoint == 'facility.list_scans' %}text-white{% else %}text-white hover:text-gray-300{% endif %}">Scans</a>
-        <a href="{{ url_for('facility.list_destination_codes') }}" class="block px-3 py-2 rounded-md text-base font-medium {% if request.endpoint == 'facility.list_destination_codes' %}text-white{% else %}text-white hover:text-gray-300{% endif %}">Destination Codes</a>
-        <a href="{{ url_for('facility.list_dock_doors') }}" class="block px-3 py-2 rounded-md text-base font-medium {% if request.endpoint == 'facility.list_dock_doors' %}text-white{% else %}text-white hover:text-gray-300{% endif %}">Dock Doors</a>
-        <a href="{{ url_for('facility.list_olpn_labels') }}" class="block px-3 py-2 rounded-md text-base font-medium {% if request.endpoint == 'facility.list_olpn_labels' %}text-white{% else %}text-white hover:text-gray-300{% endif %}">OLPN Labels</a>
-        <a href="{{ url_for('operations.loading_dashboard') }}" class="block px-3 py-2 rounded-md text-base font-medium text-white hover:text-gray-300">Stream / Live Feed</a>
+      <div class="md:hidden">
+        <button
+          id="mobile-menu-button"
+          class="text-gray-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-primary"
+        >
+          <svg
+            class="h-6 w-6"
+            xmlns="http://www.w3.org/2000/svg"
+            fill="none"
+            viewBox="0 0 24 24"
+            stroke="currentColor"
+          >
+            <path
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
+      </div>
+      <div
+        id="mobile-menu"
+        class="absolute z-10 top-full left-0 right-0 hidden md:hidden px-2 pt-2 pb-3 space-y-1 bg-primary-light transform scale-y-0 origin-top transition-transform duration-100 ease-out shadow-lg"
+      >
+        <a
+          href="{{ url_for('scan.hello') }}"
+          class="block px-3 py-2 rounded-md text-base font-medium {% if request.endpoint == 'scan.hello' %}text-white{% else %}text-white hover:text-gray-300{% endif %}"
+          >Home</a
+        >
+        <a
+          href="{{ url_for('facility.list_scans') }}"
+          class="block px-3 py-2 rounded-md text-base font-medium {% if request.endpoint == 'facility.list_scans' %}text-white{% else %}text-white hover:text-gray-300{% endif %}"
+          >Scans</a
+        >
+        <a
+          href="{{ url_for('facility.list_destination_codes') }}"
+          class="block px-3 py-2 rounded-md text-base font-medium {% if request.endpoint == 'facility.list_destination_codes' %}text-white{% else %}text-white hover:text-gray-300{% endif %}"
+          >Destination Codes</a
+        >
+        <a
+          href="{{ url_for('facility.list_dock_doors') }}"
+          class="block px-3 py-2 rounded-md text-base font-medium {% if request.endpoint == 'facility.list_dock_doors' %}text-white{% else %}text-white hover:text-gray-300{% endif %}"
+          >Dock Doors</a
+        >
+        <a
+          href="{{ url_for('facility.list_olpn_labels') }}"
+          class="block px-3 py-2 rounded-md text-base font-medium {% if request.endpoint == 'facility.list_olpn_labels' %}text-white{% else %}text-white hover:text-gray-300{% endif %}"
+          >OLPN Labels</a
+        >
+        <a
+          href="{{ url_for('operations.loading_dashboard') }}"
+          class="block px-3 py-2 rounded-md text-base font-medium text-white hover:text-gray-300"
+          >Stream / Live Feed</a
+        >
       </div>
     </div>
     <div class="container mt-4">
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          {% for category, message in messages %}
-          <div class="alert alert-{{ category }}">{{ message }}</div>
-          {% endfor %}
-        {% endif %}
-      {% endwith %}
-      {% block content %}{% endblock %}
+      {% with messages = get_flashed_messages(with_categories=true) %} {% if
+      messages %} {% for category, message in messages %}
+      <div class="alert alert-{{ category }}">{{ message }}</div>
+      {% endfor %} {% endif %} {% endwith %} {% block content %}{% endblock %}
     </div>
     <script>
-      const btn = document.getElementById('mobile-menu-button');
-      const menu = document.getElementById('mobile-menu');
-      btn?.addEventListener('click', () => {
-        menu.classList.toggle('hidden');
+      const btn = document.getElementById("mobile-menu-button");
+      const menu = document.getElementById("mobile-menu");
+      btn?.addEventListener("click", () => {
+        if (menu.classList.contains("hidden")) {
+          // Show menu with animation
+          menu.classList.remove("hidden");
+          // Force a reflow to ensure the transition works
+          menu.offsetHeight;
+          menu.classList.remove("scale-y-0");
+          menu.classList.add("scale-y-100");
+        } else {
+          // Hide menu with animation
+          menu.classList.remove("scale-y-100");
+          menu.classList.add("scale-y-0");
+          // Wait for animation to complete before hiding
+          setTimeout(() => {
+            menu.classList.add("hidden");
+          }, 300);
+        }
       });
     </script>
   </body>
