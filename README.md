@@ -36,12 +36,27 @@ useful when handling expensive or sensitive shipments.
 
 ```bash
 cd Server
+python3 -m venv venv
+source venv/bin/activate
 pip install -r requirements.txt
 python app.py
 ```
 
 By default the server runs on port `5000` and stores scans in `app.db`
 (SQLite).
+
+### Building Static Assets with npm
+
+The web interface relies on Tailwind CSS. Inside the `Server` folder you can
+install the Node dependencies and build the stylesheet:
+
+```bash
+cd Server
+npm install
+npm run build
+```
+
+Run `npm run build` again whenever you modify `tailwind.css`.
 
 ## Running the Camera Clients
 
